@@ -8,3 +8,7 @@ O material esta organizado por atividade. Cada pasta contem um notebook com a re
 
 - `pandas_intro/`: atividade introdutoria de analise exploratoria de dados com os comandos basicos do `pandas`.
 - `aula_pandas2/`: atividade voltada para filtragem, tratamento, padronizacao e agregacao de dados.
+
+## Acesse a página web do portfólio de projetos
+
+- https://kauan9r7.github.io/Ciencias_de_Dados_projetos/
