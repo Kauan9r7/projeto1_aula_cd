@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="Analise de Video Game Sales com 9 perguntas respondidas por meio de graficos e interpretacoes curtas.">
-    <title>Video Game Sales | Perguntas e Graficos</title>
+    <meta name="description" content="Portfolio do repositorio Ciencias_de_Dados_projetos com destaque para a analise de vendas de videogames.">
+    <title>Ciencias de Dados Projetos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:wght@400;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <style>
         :root {
-            --bg: #f4eee6;
-            --bg-strong: #efe3d4;
-            --surface: rgba(255, 252, 247, 0.84);
+            --bg: #f6f1e8;
+            --bg-strong: #e8dfd2;
+            --surface: rgba(255, 252, 246, 0.82);
             --surface-strong: #fffdf9;
-            --ink: #162225;
-            --muted: #5c676d;
-            --line: rgba(22, 34, 37, 0.08);
+            --ink: #122027;
+            --muted: #5d6a70;
+            --line: rgba(18, 32, 39, 0.08);
             --teal: #0f766e;
-            --teal-soft: #ccfbf1;
-            --orange: #d97706;
-            --orange-soft: #ffedd5;
-            --rose: #e76f51;
+            --teal-soft: rgba(15, 118, 110, 0.12);
+            --amber: #d97706;
+            --amber-soft: rgba(217, 119, 6, 0.12);
+            --rose: #dc6b53;
             --blue: #1d4ed8;
-            --shadow: 0 24px 60px rgba(34, 35, 33, 0.11);
+            --shadow: 0 24px 60px rgba(28, 35, 38, 0.12);
         }
 
         * {
@@ -41,13 +37,13 @@
 
         body {
             margin: 0;
+            min-height: 100vh;
             color: var(--ink);
             font-family: "Space Grotesk", sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 28%),
-                radial-gradient(circle at top right, rgba(217, 119, 6, 0.16), transparent 30%),
-                linear-gradient(180deg, var(--bg-strong) 0%, var(--bg) 50%, #f8f4ee 100%);
-            min-height: 100vh;
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 26%),
+                radial-gradient(circle at top right, rgba(217, 119, 6, 0.16), transparent 28%),
+                linear-gradient(180deg, var(--bg-strong) 0%, var(--bg) 42%, #fbf7f0 100%);
         }
 
         body::before {
@@ -56,10 +52,10 @@
             inset: 0;
             pointer-events: none;
             background-image:
-                linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+                linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
             background-size: 28px 28px;
-            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 80%);
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 82%);
         }
 
         a {
@@ -67,10 +63,98 @@
             text-decoration: none;
         }
 
+        code {
+            padding: 0.16rem 0.38rem;
+            border-radius: 8px;
+            background: rgba(18, 32, 39, 0.07);
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.9em;
+        }
+
         .page {
-            width: min(1180px, calc(100% - 32px));
+            width: min(1200px, calc(100% - 32px));
             margin: 0 auto;
-            padding: 28px 0 72px;
+            padding: 22px 0 72px;
+        }
+
+        .shell,
+        .section,
+        .card,
+        .chart-card,
+        .metric-card,
+        .method-card,
+        .heat-card {
+            border: 1px solid var(--line);
+            background: var(--surface);
+            backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
+        }
+
+        .shell,
+        .section {
+            border-radius: 30px;
+        }
+
+        .section {
+            margin-top: 26px;
+            padding: 28px;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 16px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 18px;
+            margin-bottom: 18px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(15, 118, 110, 0.18), rgba(217, 119, 6, 0.18));
+            border: 1px solid rgba(18, 32, 39, 0.08);
+            font-size: 0.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 0.94rem;
+        }
+
+        .shell {
+            padding: 34px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .shell::after {
+            content: "";
+            position: absolute;
+            right: -60px;
+            top: -50px;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(220, 107, 83, 0.2), transparent 70%);
         }
 
         .pill {
@@ -79,69 +163,69 @@
             gap: 10px;
             padding: 10px 16px;
             border-radius: 999px;
-            background: rgba(255, 250, 243, 0.78);
-            border: 1px solid rgba(22, 34, 37, 0.1);
+            background: rgba(255, 250, 243, 0.84);
+            border: 1px solid rgba(18, 32, 39, 0.1);
             color: var(--muted);
-            font-size: 0.9rem;
-            letter-spacing: 0.04em;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-size: 0.84rem;
         }
 
-        .hero {
+        .hero-grid,
+        .analysis-grid,
+        .method-grid,
+        .question-grid,
+        .project-grid,
+        .fact-grid,
+        .metric-grid {
             display: grid;
+            gap: 18px;
+        }
+
+        .hero-grid {
             grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-            gap: 24px;
             align-items: stretch;
         }
 
-        .hero-copy,
-        .hero-panel,
-        .section {
-            border: 1px solid var(--line);
-            border-radius: 30px;
-            background: var(--surface);
-            backdrop-filter: blur(18px);
-            box-shadow: var(--shadow);
+        .analysis-grid {
+            grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+            align-items: stretch;
         }
 
-        .hero-copy {
-            padding: 34px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-copy::after {
-            content: "";
-            position: absolute;
-            right: -40px;
-            bottom: -40px;
-            width: 240px;
-            height: 240px;
-            background: radial-gradient(circle, rgba(231, 111, 81, 0.26), transparent 70%);
-            border-radius: 50%;
-        }
-
-        .hero-title {
-            margin: 18px 0 16px;
-            font-size: clamp(2.7rem, 4vw, 4.8rem);
-            line-height: 0.95;
+        .hero-copy h1,
+        .analysis-copy h2 {
+            margin: 18px 0 14px;
             letter-spacing: -0.05em;
+            line-height: 0.96;
         }
 
-        .hero-subtitle {
-            margin: 0;
-            max-width: 60ch;
+        .hero-copy h1 {
+            font-size: clamp(2.9rem, 5vw, 5rem);
+        }
+
+        .analysis-copy h2 {
+            font-size: clamp(2.2rem, 4vw, 4rem);
+        }
+
+        .hero-copy p,
+        .analysis-copy p,
+        .section-copy,
+        .card p,
+        .chart-card p,
+        .method-card p,
+        .fact-card p {
+            color: #344349;
             font-family: "Source Serif 4", serif;
-            font-size: 1.24rem;
-            line-height: 1.6;
-            color: #324246;
+            line-height: 1.7;
         }
 
-        .hero-actions {
+        .hero-actions,
+        .card-actions,
+        .analysis-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
-            margin-top: 26px;
+            margin-top: 24px;
         }
 
         .button {
@@ -152,7 +236,7 @@
             border-radius: 16px;
             border: 1px solid transparent;
             font-weight: 600;
-            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
         }
 
         .button:hover {
@@ -167,38 +251,28 @@
         .button.secondary {
             background: transparent;
             color: var(--ink);
-            border-color: rgba(22, 34, 37, 0.14);
+            border-color: rgba(18, 32, 39, 0.14);
         }
 
-        .hero-panel {
-            padding: 22px;
+        .hero-panel,
+        .analysis-panel {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             gap: 16px;
         }
 
-        .panel-title {
-            margin: 0;
-            font-size: 1rem;
-            letter-spacing: 0.03em;
-            color: var(--muted);
-            text-transform: uppercase;
-        }
-
         .metric-grid {
-            display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
         }
 
         .metric-card,
         .fact-card,
+        .card,
         .chart-card,
-        .method-card {
+        .method-card,
+        .heat-card {
             border-radius: 24px;
             background: var(--surface-strong);
-            border: 1px solid rgba(22, 34, 37, 0.08);
         }
 
         .metric-card {
@@ -207,15 +281,15 @@
 
         .metric-label {
             margin: 0 0 8px;
-            font-size: 0.84rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            font-size: 0.82rem;
             color: var(--muted);
         }
 
         .metric-value {
             margin: 0;
-            font-size: 1.9rem;
+            font-size: 1.95rem;
             font-weight: 700;
             letter-spacing: -0.04em;
         }
@@ -223,46 +297,85 @@
         .metric-detail {
             margin: 8px 0 0;
             color: var(--muted);
-            font-size: 0.98rem;
-            line-height: 1.45;
-        }
-
-        .section {
-            margin-top: 28px;
-            padding: 28px;
-        }
-
-        .section-head {
-            margin-bottom: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
         .section-kicker {
             margin: 0 0 8px;
-            color: var(--orange);
-            font-size: 0.88rem;
-            letter-spacing: 0.05em;
+            color: var(--amber);
             text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.84rem;
         }
 
         .section-title {
             margin: 0;
-            font-size: clamp(1.7rem, 2vw, 2.4rem);
+            font-size: clamp(1.8rem, 2.5vw, 2.6rem);
             letter-spacing: -0.04em;
         }
 
         .section-copy {
             margin: 12px 0 0;
             max-width: 68ch;
-            color: #39484d;
-            line-height: 1.7;
-            font-family: "Source Serif 4", serif;
-            font-size: 1.08rem;
+            font-size: 1.05rem;
+        }
+
+        .project-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin-top: 24px;
+        }
+
+        .card {
+            padding: 22px;
+        }
+
+        .card.highlight {
+            background:
+                linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(217, 119, 6, 0.12)),
+                var(--surface-strong);
+        }
+
+        .card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: var(--teal-soft);
+            color: var(--teal);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .tag.alt {
+            background: var(--amber-soft);
+            color: var(--amber);
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 0.9rem;
         }
 
         .fact-grid {
-            display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 16px;
             margin-top: 22px;
         }
 
@@ -273,28 +386,21 @@
         .fact-card strong {
             display: block;
             margin-bottom: 10px;
-            font-size: 1.08rem;
+            font-size: 1.04rem;
         }
 
-        .fact-card p {
-            margin: 0;
-            color: var(--muted);
-            line-height: 1.6;
-        }
-
-        .chart-grid {
-            display: grid;
+        .question-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 18px;
             margin-top: 22px;
         }
 
-        .chart-card {
+        .chart-card,
+        .heat-card {
             padding: 22px;
-            min-height: 360px;
         }
 
-        .chart-card.large {
+        .chart-card.large,
+        .heat-card.large {
             grid-column: span 2;
         }
 
@@ -304,39 +410,92 @@
             justify-content: center;
             padding: 6px 10px;
             border-radius: 999px;
-            background: var(--orange-soft);
-            color: var(--orange);
-            font-size: 0.82rem;
-            letter-spacing: 0.04em;
+            background: var(--amber-soft);
+            color: var(--amber);
+            font-size: 0.8rem;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
             margin-bottom: 12px;
         }
 
-        .chart-card h3 {
+        .chart-card h3,
+        .heat-card h3 {
             margin: 0 0 8px;
             font-size: 1.16rem;
         }
 
-        .chart-card p {
-            margin: 0 0 18px;
-            color: var(--muted);
-            line-height: 1.55;
-        }
-
         .chart-wrap {
             position: relative;
-            height: 290px;
+            height: 320px;
         }
 
         .chart-card.large .chart-wrap {
-            height: 340px;
+            height: 360px;
+        }
+
+        .heat-grid {
+            display: grid;
+            gap: 6px;
+            margin-top: 18px;
+        }
+
+        .heat-header,
+        .heat-label,
+        .heat-cell {
+            border-radius: 16px;
+        }
+
+        .heat-header {
+            padding: 12px 8px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(18, 32, 39, 0.04);
+        }
+
+        .heat-label {
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            min-height: 58px;
+            background: rgba(18, 32, 39, 0.04);
+            font-weight: 600;
+        }
+
+        .heat-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 58px;
+            font-weight: 700;
+            transition: transform 0.18s ease;
+        }
+
+        .heat-cell:hover {
+            transform: translateY(-2px);
+        }
+
+        .legend {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .legend-bar {
+            width: 180px;
+            height: 10px;
+            border-radius: 999px;
         }
 
         .method-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 18px;
-            margin-top: 20px;
+            grid-template-columns: 1.15fr 0.85fr;
+            margin-top: 22px;
         }
 
         .method-card {
@@ -344,20 +503,30 @@
         }
 
         .method-card ul {
-            margin: 0;
+            margin: 16px 0 0;
             padding-left: 18px;
             color: var(--muted);
-            line-height: 1.75;
+            line-height: 1.8;
         }
 
-        .note {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 14px;
-            border-radius: 14px;
-            background: var(--teal-soft);
-            color: #0d5f58;
-            font-size: 0.95rem;
+        .code-block {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 18px;
+            background: #17252b;
+            color: #eef6f7;
+            font-family: "Space Grotesk", sans-serif;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            white-space: pre;
         }
 
         .footer {
@@ -366,7 +535,7 @@
             align-items: center;
             gap: 16px;
             margin-top: 26px;
-            padding: 6px 2px 0;
+            padding: 4px 2px 0;
             color: var(--muted);
         }
 
@@ -378,373 +547,499 @@
 
         .footer-links a {
             padding-bottom: 2px;
-            border-bottom: 1px solid rgba(22, 34, 37, 0.14);
+            border-bottom: 1px solid rgba(18, 32, 39, 0.14);
         }
 
         @media (max-width: 980px) {
-            .hero,
-            .method-grid,
-            .chart-grid,
-            .fact-grid {
+            .hero-grid,
+            .analysis-grid,
+            .project-grid,
+            .fact-grid,
+            .question-grid,
+            .method-grid {
                 grid-template-columns: 1fr;
             }
 
-            .chart-card.large {
+            .chart-card.large,
+            .heat-card.large {
                 grid-column: auto;
             }
         }
 
         @media (max-width: 640px) {
             .page {
-                width: min(100% - 20px, 1180px);
-                padding-top: 20px;
+                width: min(100% - 20px, 1200px);
+                padding-top: 18px;
                 padding-bottom: 48px;
             }
 
-            .hero-copy,
-            .hero-panel,
+            .shell,
             .section {
                 border-radius: 24px;
+                padding: 22px;
             }
 
-            .hero-copy,
-            .section {
-                padding: 22px;
+            .topbar {
+                padding: 12px 14px;
             }
 
             .metric-grid {
                 grid-template-columns: 1fr;
             }
 
-            .hero-title {
-                font-size: 2.45rem;
+            .hero-copy h1,
+            .analysis-copy h2 {
+                font-size: 2.4rem;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
 </head>
-
 <body>
     <div class="page">
-        <header class="hero">
+        <nav class="shell topbar">
+            <a class="brand" href="#top">
+                <span class="brand-mark">CD</span>
+                <span>Ciencias de Dados Projetos</span>
+            </a>
+            <div class="nav-links">
+                <a href="#projetos">Projetos</a>
+                <a href="#vgsales">Analise vgsales</a>
+                <a href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos" target="_blank" rel="noreferrer">GitHub</a>
+            </div>
+        </nav>
+
+        <header class="shell hero-grid" id="top">
             <section class="hero-copy">
-                <span class="pill">GitHub Pages | 9 perguntas visuais</span>
-                <h1 class="hero-title">Video Game Sales</h1>
-                <p class="hero-subtitle">
-                    Esta pagina transforma o notebook em uma leitura guiada por perguntas. Em vez de mostrar so tabelas,
-                    ela organiza a analise em respostas diretas: onde faltam dados, quando o mercado explode, quais
-                    generos e plataformas dominam e como as regioes mudam a interpretacao.
+                <span class="pill">Repositorio academico | GitHub Pages unificado</span>
+                <h1>Projetos de Introducao a Ciencia de Dados</h1>
+                <p>
+                    Este portfolio organiza as atividades do repositorio em uma unica pagina. Cada pasta do projeto aparece
+                    como uma atividade independente, com destaque para <strong>analise-vgsales</strong>, cuja apresentacao
+                    visual agora foi incorporada ao GitHub Pages principal do repositorio.
                 </p>
                 <div class="hero-actions">
-                    <a class="button primary" href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos"
-                        target="_blank" rel="noreferrer">Ver repositorio</a>
-                    <a class="button secondary"
-                        href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/blob/master/video_game_sales_grupo/exercicio.ipynb"
-                        target="_blank" rel="noreferrer">Abrir notebook</a>
+                    <a class="button primary" href="#projetos">Ver projetos</a>
+                    <a class="button secondary" href="#vgsales">Ir para o destaque</a>
+                    <a class="button secondary" href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos" target="_blank" rel="noreferrer">Abrir repositorio</a>
                 </div>
             </section>
 
             <aside class="hero-panel">
-                <p class="panel-title">Resumo rapido</p>
                 <div class="metric-grid">
                     <article class="metric-card">
-                        <p class="metric-label">Base tratada</p>
-                        <p class="metric-value">16.291</p>
-                        <p class="metric-detail">jogos apos remover ausencias em Year e Publisher.</p>
+                        <p class="metric-label">Pastas de projeto</p>
+                        <p class="metric-value">4</p>
+                        <p class="metric-detail">Cada pasta representa uma atividade ou trabalho da disciplina.</p>
                     </article>
                     <article class="metric-card">
-                        <p class="metric-label">Pico de vendas</p>
-                        <p class="metric-value">2008</p>
-                        <p class="metric-detail">678,90 milhoes em vendas globais.</p>
+                        <p class="metric-label">Notebooks</p>
+                        <p class="metric-value">5</p>
+                        <p class="metric-detail">Exploracao, limpeza, metricas, visualizacoes e um estudo final mais completo.</p>
                     </article>
                     <article class="metric-card">
-                        <p class="metric-label">Mais lancamentos</p>
-                        <p class="metric-value">2009</p>
-                        <p class="metric-detail">1.431 jogos no mesmo ano.</p>
+                        <p class="metric-label">Destaque atual</p>
+                        <p class="metric-value">vgsales</p>
+                        <p class="metric-detail">Analise exploratoria com 7 perguntas respondidas por graficos.</p>
                     </article>
                     <article class="metric-card">
-                        <p class="metric-label">Jogo lider</p>
-                        <p class="metric-value">Wii Sports</p>
-                        <p class="metric-detail">82,74 milhoes vendidos no Wii.</p>
+                        <p class="metric-label">Pages</p>
+                        <p class="metric-value">1 pagina</p>
+                        <p class="metric-detail">Toda a vitrine do repositorio fica centralizada neste <code>docs/index.html</code>.</p>
                     </article>
                 </div>
             </aside>
         </header>
 
+        <section class="section" id="projetos">
+            <div>
+                <p class="section-kicker">Mapa do repositorio</p>
+                <h2 class="section-title">Cada pasta, um projeto ou atividade</h2>
+                <p class="section-copy">
+                    Os cards abaixo apresentam o foco de cada trabalho. Para os projetos que nao sao <code>analise-vgsales</code>,
+                    o acesso fica diretamente no GitHub. O destaque tem uma secao completa na propria pagina.
+                </p>
+            </div>
+
+            <div class="project-grid">
+                <article class="card highlight">
+                    <div class="card-head">
+                        <div>
+                            <h3 class="card-title">analise-vgsales</h3>
+                            <p>Analise exploratoria da base Video Game Sales com notebook enxuto e base baixada via <code>kagglehub</code>.</p>
+                        </div>
+                        <span class="tag">Destaque</span>
+                    </div>
+                    <div class="card-meta">
+                        <span>1 notebook</span>
+                        <span>7 perguntas</span>
+                        <span>KaggleHub</span>
+                    </div>
+                    <div class="card-actions">
+                        <a class="button primary" href="#vgsales">Abrir na pagina</a>
+                        <a class="button secondary" href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/blob/master/analise-vgsales/vgsales_analise.ipynb" target="_blank" rel="noreferrer">Notebook</a>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-head">
+                        <div>
+                            <h3 class="card-title">pandas_intro</h3>
+                            <p>Atividade introdutoria de exploracao inicial com <code>pandas</code>, leitura da base e primeiras inspecoes.</p>
+                        </div>
+                        <span class="tag alt">GitHub</span>
+                    </div>
+                    <div class="card-meta">
+                        <span>1 notebook</span>
+                        <span>Exploracao inicial</span>
+                    </div>
+                    <div class="card-actions">
+                        <a class="button secondary" href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/tree/master/pandas_intro" target="_blank" rel="noreferrer">Abrir no GitHub</a>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-head">
+                        <div>
+                            <h3 class="card-title">aula_pandas2</h3>
+                            <p>Atividade de limpeza, transformacao, padronizacao, agrupamento e preparacao de dados para analise.</p>
+                        </div>
+                        <span class="tag alt">GitHub</span>
+                    </div>
+                    <div class="card-meta">
+                        <span>1 notebook</span>
+                        <span>Tratamento de dados</span>
+                    </div>
+                    <div class="card-actions">
+                        <a class="button secondary" href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/tree/master/aula_pandas2" target="_blank" rel="noreferrer">Abrir no GitHub</a>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-head">
+                        <div>
+                            <h3 class="card-title">medidas_visualizacoes</h3>
+                            <p>Conjunto de exercicios sobre metricas e visualizacoes com dados do Bolsa Familia, dividido em dois notebooks.</p>
+                        </div>
+                        <span class="tag alt">GitHub</span>
+                    </div>
+                    <div class="card-meta">
+                        <span>2 notebooks</span>
+                        <span>Metricas e graficos</span>
+                    </div>
+                    <div class="card-actions">
+                        <a class="button secondary" href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/tree/master/medidas_visualizacoes" target="_blank" rel="noreferrer">Abrir no GitHub</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" id="vgsales">
+            <div class="analysis-grid">
+                <section class="analysis-copy">
+                    <span class="pill">Projeto em destaque | analise-vgsales</span>
+                    <h2>Video Game Sales em 7 perguntas visuais</h2>
+                    <p>
+                        Esta secao transfere a apresentacao do antigo Pages de <code>analise-vgsales</code> para o Pages principal do
+                        repositorio. O notebook foi mantido como arquivo central do projeto, enquanto a base agora e
+                        baixada via <strong>kagglehub</strong>, sem depender de <code>csv</code> salvo dentro da pasta.
+                    </p>
+                    <div class="analysis-actions">
+                        <a class="button primary" href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/blob/master/analise-vgsales/vgsales_analise.ipynb" target="_blank" rel="noreferrer">Abrir notebook</a>
+                        <a class="button secondary" href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/tree/master/analise-vgsales" target="_blank" rel="noreferrer">Pasta no GitHub</a>
+                    </div>
+                </section>
+
+                <aside class="analysis-panel">
+                    <div class="metric-grid">
+                        <article class="metric-card">
+                            <p class="metric-label">Jogos</p>
+                            <p class="metric-value">16.598</p>
+                            <p class="metric-detail">Titulos registrados na base original.</p>
+                        </article>
+                        <article class="metric-card">
+                            <p class="metric-label">Periodo</p>
+                            <p class="metric-value">1980-2020</p>
+                            <p class="metric-detail">Serie historica do dataset usado no notebook.</p>
+                        </article>
+                        <article class="metric-card">
+                            <p class="metric-label">Pico</p>
+                            <p class="metric-value">2008</p>
+                            <p class="metric-detail">Maior ano em vendas globais, com 678,9 milhoes.</p>
+                        </article>
+                        <article class="metric-card">
+                            <p class="metric-label">Lider</p>
+                            <p class="metric-value">Wii Sports</p>
+                            <p class="metric-detail">Jogo mais vendido da base, com 82,74 milhoes.</p>
+                        </article>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
         <section class="section">
-            <div class="section-head">
-                <p class="section-kicker">Leitura executiva</p>
+            <div>
+                <p class="section-kicker">Leitura rapida</p>
                 <h2 class="section-title">O que esta analise deixa claro</h2>
                 <p class="section-copy">
-                    O dataset tem poucas ausencias relevantes, o auge comercial se concentra entre 2007 e 2010 e a
-                    Nintendo aparece com enorme peso tanto entre publicadoras quanto entre os jogos mais vendidos. No
-                    recorte regional, a America do Norte lidera o volume total, enquanto Role-Playing ganha mais peso
-                    relativo no Japao.
+                    O auge comercial da base esta concentrado entre 2007 e 2010, a Nintendo domina jogos e publishers,
+                    e a America do Norte aparece como principal centro de vendas. O recorte regional tambem mostra que
+                    o Japao se comporta de forma diferente, com peso bem maior de RPG.
                 </p>
             </div>
 
             <div class="fact-grid">
                 <article class="fact-card">
                     <strong>Mercado no auge no fim dos anos 2000</strong>
-                    <p>2008 lidera em vendas globais e 2009 lidera em quantidade de lancamentos, mostrando um periodo
-                        muito forte de expansao.</p>
+                    <p>As vendas explodem em 2008 e 2009, refletindo a fase mais forte de Wii, PS3, Xbox 360 e DS.</p>
                 </article>
                 <article class="fact-card">
-                    <strong>Action e PS2 puxam o historico</strong>
-                    <p>Action lidera entre os generos e PS2 domina entre as plataformas, reforcando a forca da geracao
-                        dos anos 2000.</p>
+                    <strong>Nintendo concentra valor</strong>
+                    <p>Ela lidera ao mesmo tempo entre os jogos mais vendidos e entre as publishers mais fortes da base.</p>
                 </article>
                 <article class="fact-card">
-                    <strong>A regiao muda a leitura por genero</strong>
-                    <p>Action, Sports e Shooter dependem mais de America do Norte e Europa, enquanto Role-Playing fica
-                        relativamente mais forte no Japao.</p>
+                    <strong>Regiao muda a leitura do genero</strong>
+                    <p>Action, Sports e Shooter crescem no Ocidente, enquanto Role-Playing ganha muito mais peso no Japao.</p>
                 </article>
             </div>
         </section>
 
         <section class="section">
-            <div class="section-head">
+            <div>
                 <p class="section-kicker">Perguntas respondidas</p>
-                <h2 class="section-title">9 respostas com 9 graficos</h2>
+                <h2 class="section-title">Os 7 graficos do notebook</h2>
                 <p class="section-copy">
-                    A mesma logica do notebook aparece aqui em formato de portfolio: cada bloco traz a pergunta, o
-                    grafico e uma interpretacao curta para acelerar a leitura.
+                    Abaixo, o conteudo do projeto aparece em formato de portfolio. Cada grafico responde uma das
+                    perguntas centrais da analise e transforma o notebook em uma leitura guiada.
                 </p>
             </div>
 
-            <div class="chart-grid">
+            <div class="question-grid">
                 <article class="chart-card">
                     <span class="question-id">Pergunta 1</span>
-                    <h3>Onde estao os principais dados ausentes?</h3>
-                    <p>As ausencias se concentram em `Year` e `Publisher`. O resto da base esta completo, o que ajuda a
-                        sustentar a analise sem grandes perdas.</p>
+                    <h3>Quais sao os 10 jogos mais vendidos?</h3>
+                    <p>O ranking evidencia o dominio da Nintendo e mostra como Wii Sports se distancia dos demais titulos.</p>
                     <div class="chart-wrap">
-                        <canvas id="missingChart"></canvas>
+                        <canvas id="chartQ1"></canvas>
                     </div>
                 </article>
 
-                <article class="chart-card large">
+                <article class="chart-card">
                     <span class="question-id">Pergunta 2</span>
-                    <h3>Em quais anos as vendas globais atingiram o pico?</h3>
-                    <p>O maior valor aparece em 2008, com 678,90 milhoes. 2009 e 2010 continuam em patamar muito alto,
-                        consolidando o fim dos anos 2000 como o auge do dataset.</p>
+                    <h3>Qual genero vende mais globalmente?</h3>
+                    <p>Action lidera com folga, seguido por Sports e Shooter, tres categorias com forte apelo comercial.</p>
                     <div class="chart-wrap">
-                        <canvas id="salesByYear"></canvas>
+                        <canvas id="chartQ2"></canvas>
                     </div>
                 </article>
 
                 <article class="chart-card large">
                     <span class="question-id">Pergunta 3</span>
-                    <h3>Em quais anos houve mais lancamentos de jogos?</h3>
-                    <p>O ano de 2009 lidera em quantidade de titulos. Isso mostra que o pico comercial tambem veio
-                        acompanhado por uma oferta muito alta de jogos.</p>
+                    <h3>Como o mercado evoluiu ao longo dos anos?</h3>
+                    <p>O pico fica concentrado entre 2008 e 2009. A queda posterior precisa ser lida junto com a migracao para vendas digitais.</p>
                     <div class="chart-wrap">
-                        <canvas id="releasesByYear"></canvas>
+                        <canvas id="chartQ3"></canvas>
                     </div>
                 </article>
 
                 <article class="chart-card">
                     <span class="question-id">Pergunta 4</span>
-                    <h3>Quais generos mais venderam?</h3>
-                    <p>Action assume a primeira posicao, seguido por Sports e Shooter. O mercado historico favorece
-                        generos de escala ampla e apelo massivo.</p>
+                    <h3>Quais plataformas dominaram historicamente?</h3>
+                    <p>PS2, X360, PS3 e Wii lideram a serie e reforcam o peso da geracao dos anos 2000 no dataset.</p>
                     <div class="chart-wrap">
-                        <canvas id="genresChart"></canvas>
+                        <canvas id="chartQ4"></canvas>
                     </div>
                 </article>
 
                 <article class="chart-card">
                     <span class="question-id">Pergunta 5</span>
-                    <h3>Quais plataformas dominaram as vendas?</h3>
-                    <p>PS2 abre vantagem no ranking, com X360, PS3 e Wii logo atras. O centro da base esta fortemente
-                        ligado a plataformas dominantes dos anos 2000.</p>
+                    <h3>Como as vendas se distribuem entre regioes?</h3>
+                    <p>A America do Norte lidera o volume total, seguida pela Europa. O centro comercial da base esta no Ocidente.</p>
                     <div class="chart-wrap">
-                        <canvas id="platformsChart"></canvas>
+                        <canvas id="chartQ5"></canvas>
                     </div>
                 </article>
 
                 <article class="chart-card">
                     <span class="question-id">Pergunta 6</span>
-                    <h3>Quais publicadoras concentraram mais vendas?</h3>
-                    <p>Nintendo lidera com ampla margem, seguida por Electronic Arts e Activision. A concentracao de
-                        catalogos fortes explica boa parte dessa vantagem.</p>
+                    <h3>Quais publishers lideram em vendas globais?</h3>
+                    <p>Nintendo abre ampla vantagem, com EA e Activision logo atras no segundo bloco de grandes editoras.</p>
                     <div class="chart-wrap">
-                        <canvas id="publishersChart"></canvas>
+                        <canvas id="chartQ6"></canvas>
                     </div>
                 </article>
 
-                <article class="chart-card">
+                <article class="heat-card large">
                     <span class="question-id">Pergunta 7</span>
-                    <h3>Quais jogos foram os maiores campeoes de vendas?</h3>
-                    <p>Wii Sports se distancia muito do restante. O topo do ranking tambem reforca o peso da Nintendo
-                        nas franquias mais valiosas da base.</p>
-                    <div class="chart-wrap">
-                        <canvas id="gamesChart"></canvas>
-                    </div>
-                </article>
-
-                <article class="chart-card">
-                    <span class="question-id">Pergunta 8</span>
-                    <h3>Como as vendas se distribuem entre as regioes?</h3>
-                    <p>America do Norte lidera com folga, seguida por Europa e Japao. O centro de gravidade comercial
-                        do dataset esta mais no Ocidente.</p>
-                    <div class="chart-wrap">
-                        <canvas id="regionsChart"></canvas>
-                    </div>
-                </article>
-
-                <article class="chart-card large">
-                    <span class="question-id">Pergunta 9</span>
-                    <h3>O peso das regioes muda entre os generos lideres?</h3>
-                    <p>Sim. Action, Sports e Shooter dependem mais de America do Norte e Europa, enquanto
-                        Role-Playing mostra um peso japones relativamente maior.</p>
-                    <div class="chart-wrap">
-                        <canvas id="genreRegionChart"></canvas>
+                    <h3>Cada regiao prefere um genero diferente?</h3>
+                    <p>O heatmap usa percentuais regionais para mostrar como o perfil de consumo muda entre NA, EU, JP e outras regioes.</p>
+                    <div id="heatmap" class="heat-grid"></div>
+                    <div class="legend">
+                        <span>menor</span>
+                        <span class="legend-bar" id="heatLegend"></span>
+                        <span>maior peso no mercado regional</span>
                     </div>
                 </article>
             </div>
         </section>
 
         <section class="section">
-            <div class="section-head">
+            <div>
                 <p class="section-kicker">Metodo</p>
-                <h2 class="section-title">Como esta pagina foi montada</h2>
+                <h2 class="section-title">Como o projeto ficou organizado</h2>
             </div>
+
             <div class="method-grid">
                 <article class="method-card">
                     <p class="section-copy" style="margin-top: 0;">
-                        A pagina traduz o notebook `video_game_sales_grupo/exercicio.ipynb` para um formato de GitHub
-                        Pages. O objetivo foi deixar a narrativa mais clara para apresentacao, com perguntas explicitas
-                        e respostas visuais diretas.
+                        A pasta <code>analise-vgsales</code> foi simplificada para manter apenas o notebook e o <code>README</code>. A base nao
+                        precisa mais ficar versionada dentro do projeto, porque o proprio notebook faz o download da
+                        versao mais recente do dataset diretamente pelo KaggleHub.
+                    </p>
+                    <div class="code-block">
+                        <code>import kagglehub
+from pathlib import Path
+import pandas as pd
+
+path = Path(kagglehub.dataset_download("gregorut/videogamesales"))
+df = pd.read_csv(path / "vgsales.csv")</code>
+                    </div>
+                </article>
+
+                <article class="method-card">
+                    <p class="section-copy" style="margin-top: 0;">
+                        O Pages do projeto passou a viver no <code>docs</code> principal do repositorio em um unico <code>index.html</code>.
+                        Isso deixa a vitrine centralizada e transforma a secao de <code>vgsales</code> em parte do portfolio geral.
                     </p>
                     <ul>
-                        <li>Base original com 16.598 linhas e 11 colunas.</li>
-                        <li>Base tratada com 16.291 linhas apos remover ausencias em `Year` e `Publisher`.</li>
-                        <li>Analise com 9 perguntas e 9 graficos.</li>
-                        <li>Vendas expressas em milhoes, seguindo o dataset original.</li>
+                        <li>Outros projetos aparecem como cards com link direto para o GitHub.</li>
+                        <li><code>analise-vgsales</code> ganhou uma secao completa dentro da mesma pagina.</li>
+                        <li>O HTML foi montado como arquivo unico, sem depender de <code>app.js</code> ou <code>data.js</code> locais.</li>
                     </ul>
-                </article>
-                <article class="method-card">
-                    <strong>Leitura importante</strong>
-                    <p class="section-copy" style="margin-top: 10px;">
-                        Os anos finais da base tem poucos registros, especialmente 2017 e 2020. Por isso, a queda
-                        extrema no final da serie deve ser lida como limite do dataset, e nao so como comportamento real
-                        do mercado.
-                    </p>
-                    <span class="note">O notebook e a pagina agora contam a mesma historia, com a mesma estrutura de
-                        perguntas e graficos.</span>
                 </article>
             </div>
         </section>
 
         <footer class="footer">
-            <span>Projeto de Introducao a Ciencia de Dados | Cauan</span>
+            <span>Repositorio academico de Introducao a Ciencia de Dados</span>
             <div class="footer-links">
-                <a href="https://github.com/Kauan9r7" target="_blank" rel="noreferrer">GitHub</a>
-                <a href="https://www.linkedin.com/in/cauan-bastos-202389400/" target="_blank"
-                    rel="noreferrer">LinkedIn</a>
+                <a href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos" target="_blank" rel="noreferrer">GitHub</a>
+                <a href="https://kauan9r7.github.io/Ciencias_de_Dados_projetos/" target="_blank" rel="noreferrer">GitHub Pages</a>
             </div>
         </footer>
     </div>
 
     <script>
-        const missingValues = {
-            labels: ["Year", "Publisher"],
-            values: [271, 58]
-        };
-
-        const yearlySales = {
-            labels: [1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-                1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
-                2012, 2013, 2014, 2015, 2016, 2017, 2020
+        const VGSALES = {
+            meta: {
+                totalGames: 16598,
+                yearMin: 1980,
+                yearMax: 2020,
+                totalSales: 8920.4,
+                platforms: 31,
+                publishers: 578,
+                genres: 12
+            },
+            q1: [
+                { name: "Wii Sports", platform: "Wii", sales: 82.74 },
+                { name: "Super Mario Bros.", platform: "NES", sales: 40.24 },
+                { name: "Mario Kart Wii", platform: "Wii", sales: 35.82 },
+                { name: "Wii Sports Resort", platform: "Wii", sales: 33.0 },
+                { name: "Pokemon Red/Pokemon Blue", platform: "GB", sales: 31.37 },
+                { name: "Tetris", platform: "GB", sales: 30.26 },
+                { name: "New Super Mario Bros.", platform: "DS", sales: 30.01 },
+                { name: "Wii Play", platform: "Wii", sales: 29.02 },
+                { name: "New Super Mario Bros. Wii", platform: "Wii", sales: 28.62 },
+                { name: "Duck Hunt", platform: "NES", sales: 28.31 }
             ],
-            values: [11.38, 35.77, 28.86, 16.79, 50.36, 53.94, 37.07, 21.74, 47.22, 73.45, 49.39, 32.23, 76.16, 45.98,
-                79.17, 88.11, 199.15, 200.98, 256.47, 251.27, 201.56, 331.47, 395.52, 357.85, 414.01, 458.51,
-                521.04, 609.92, 678.9, 667.3, 600.29, 515.8, 363.49, 368.11, 337.03, 264.44, 70.9, 0.05, 0.29
-            ]
-        };
-
-        const releasesByYear = {
-            labels: [1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-                1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
-                2012, 2013, 2014, 2015, 2016, 2017, 2020
+            q2: [
+                { genre: "Action", sales: 1751.2 },
+                { genre: "Sports", sales: 1330.9 },
+                { genre: "Shooter", sales: 1037.4 },
+                { genre: "Role-Playing", sales: 927.4 },
+                { genre: "Platform", sales: 831.4 },
+                { genre: "Misc", sales: 810.0 },
+                { genre: "Racing", sales: 732.0 },
+                { genre: "Fighting", sales: 448.9 }
             ],
-            values: [9, 46, 36, 17, 14, 14, 21, 16, 15, 17, 16, 41, 43, 60, 121, 219, 263, 289, 379, 338, 349, 482,
-                829, 775, 744, 936, 1008, 1201, 1428, 1431, 1257, 1136, 655, 546, 580, 614, 342, 3, 1
-            ]
-        };
-
-        const topGenres = {
-            labels: ["Action", "Sports", "Shooter", "Role-Playing", "Platform", "Misc", "Racing", "Fighting"],
-            values: [1722.84, 1309.24, 1026.2, 923.83, 829.13, 789.87, 726.76, 444.05]
-        };
-
-        const topPlatforms = {
-            labels: ["PS2", "X360", "PS3", "Wii", "DS", "PS", "GBA", "PSP"],
-            values: [1233.46, 969.6, 949.35, 909.81, 818.91, 727.39, 305.62, 291.71]
-        };
-
-        const topPublishers = {
-            labels: [
-                "Nintendo",
-                "Electronic Arts",
-                "Activision",
-                "Sony Computer Entertainment",
-                "Ubisoft",
-                "Take-Two Interactive",
-                "THQ",
-                "Konami Digital Entertainment"
+            q3: [
+                { year: 1980, sales: 11.38 }, { year: 1981, sales: 35.77 }, { year: 1982, sales: 28.86 },
+                { year: 1983, sales: 16.79 }, { year: 1984, sales: 50.36 }, { year: 1985, sales: 53.94 },
+                { year: 1986, sales: 37.07 }, { year: 1987, sales: 21.74 }, { year: 1988, sales: 47.22 },
+                { year: 1989, sales: 73.45 }, { year: 1990, sales: 49.39 }, { year: 1991, sales: 32.23 },
+                { year: 1992, sales: 76.16 }, { year: 1993, sales: 45.98 }, { year: 1994, sales: 79.17 },
+                { year: 1995, sales: 88.11 }, { year: 1996, sales: 199.15 }, { year: 1997, sales: 200.98 },
+                { year: 1998, sales: 256.47 }, { year: 1999, sales: 251.27 }, { year: 2000, sales: 201.56 },
+                { year: 2001, sales: 331.47 }, { year: 2002, sales: 395.52 }, { year: 2003, sales: 357.85 },
+                { year: 2004, sales: 419.31 }, { year: 2005, sales: 459.94 }, { year: 2006, sales: 521.04 },
+                { year: 2007, sales: 611.13 }, { year: 2008, sales: 678.9 }, { year: 2009, sales: 667.3 },
+                { year: 2010, sales: 600.45 }, { year: 2011, sales: 515.99 }, { year: 2012, sales: 363.54 },
+                { year: 2013, sales: 368.11 }, { year: 2014, sales: 337.05 }, { year: 2015, sales: 264.44 },
+                { year: 2016, sales: 70.93 }, { year: 2017, sales: 0.05 }, { year: 2020, sales: 0.29 }
             ],
-            values: [1784.43, 1093.39, 721.41, 607.28, 473.54, 399.3, 340.44, 278.56]
-        };
-
-        const topGames = {
-            labels: [
-                "Wii Sports (Wii)",
-                "Super Mario Bros. (NES)",
-                "Mario Kart Wii (Wii)",
-                "Wii Sports Resort (Wii)",
-                "Pokemon Red/Pokemon Blue (GB)",
-                "Tetris (GB)",
-                "New Super Mario Bros. (DS)",
-                "Wii Play (Wii)"
+            q4: [
+                { platform: "PS2", sales: 1255.6, maker: "Sony" },
+                { platform: "X360", sales: 980.0, maker: "Microsoft" },
+                { platform: "PS3", sales: 957.8, maker: "Sony" },
+                { platform: "Wii", sales: 926.7, maker: "Nintendo" },
+                { platform: "DS", sales: 822.5, maker: "Nintendo" },
+                { platform: "PS", sales: 730.7, maker: "Sony" },
+                { platform: "GBA", sales: 318.5, maker: "Nintendo" },
+                { platform: "PSP", sales: 296.3, maker: "Sony" },
+                { platform: "PS4", sales: 278.1, maker: "Sony" },
+                { platform: "PC", sales: 258.8, maker: "PC" }
             ],
-            values: [82.74, 40.24, 35.82, 33.0, 31.37, 30.26, 30.01, 29.02]
-        };
-
-        const regions = {
-            labels: ["America do Norte", "Europa", "Japao", "Outras regioes"],
-            values: [4327.65, 2406.69, 1284.27, 788.91]
-        };
-
-        const genreRegion = {
-            labels: ["Action", "Sports", "Shooter", "Role-Playing", "Platform"],
-            datasets: [{
-                    label: "America do Norte",
-                    data: [861.77, 670.09, 575.16, 326.5, 445.99],
-                    color: "#0f766e"
-                },
-                {
-                    label: "Europa",
-                    data: [516.48, 371.34, 310.45, 187.57, 200.65],
-                    color: "#f4b740"
-                },
-                {
-                    label: "Japao",
-                    data: [158.65, 134.76, 38.18, 350.29, 130.65],
-                    color: "#e76f51"
-                },
-                {
-                    label: "Outras regioes",
-                    data: [184.92, 132.65, 101.9, 59.38, 51.51],
-                    color: "#1d4ed8"
-                }
-            ]
+            q5: [
+                { region: "America do Norte", sales: 4393.0 },
+                { region: "Europa", sales: 2434.1 },
+                { region: "Japao", sales: 1291.0 },
+                { region: "Outras regioes", sales: 797.8 }
+            ],
+            q6: [
+                { publisher: "Nintendo", sales: 1786.6 },
+                { publisher: "Electronic Arts", sales: 1110.3 },
+                { publisher: "Activision", sales: 727.5 },
+                { publisher: "Sony Computer Entertainment", sales: 607.5 },
+                { publisher: "Ubisoft", sales: 474.7 },
+                { publisher: "Take-Two Interactive", sales: 399.5 },
+                { publisher: "THQ", sales: 340.8 },
+                { publisher: "Konami Digital Entertainment", sales: 283.6 }
+            ],
+            q7: {
+                genres: [
+                    "Action", "Sports", "Shooter", "Platform", "Misc", "Racing",
+                    "Role-Playing", "Fighting", "Simulation", "Puzzle", "Adventure", "Strategy"
+                ],
+                regions: ["NA", "EU", "JP", "Outras"],
+                values: [
+                    [20.0, 21.6, 12.4, 23.5],
+                    [15.6, 15.5, 10.5, 16.9],
+                    [13.3, 12.9, 3.0, 12.9],
+                    [10.2, 8.3, 10.1, 6.5],
+                    [9.3, 8.9, 8.3, 9.4],
+                    [8.2, 9.8, 4.4, 9.7],
+                    [7.5, 7.7, 27.3, 7.5],
+                    [5.1, 4.2, 6.8, 4.6],
+                    [4.2, 4.7, 4.9, 4.0],
+                    [2.8, 2.1, 4.4, 1.6],
+                    [2.4, 2.6, 4.0, 2.1],
+                    [1.6, 1.9, 3.8, 1.4]
+                ]
+            }
         };
 
         const numberFormat = new Intl.NumberFormat("pt-BR", {
             minimumFractionDigits: 0,
             maximumFractionDigits: 2
         });
+
+        Chart.defaults.color = "#415057";
+        Chart.defaults.font.family = '"Space Grotesk", sans-serif';
+        Chart.defaults.borderColor = "rgba(18, 32, 39, 0.06)";
 
         const commonPlugins = {
             legend: {
@@ -753,7 +1048,7 @@
                     pointStyle: "circle",
                     boxWidth: 10,
                     padding: 16,
-                    color: "#324246",
+                    color: "#415057",
                     font: {
                         family: "Space Grotesk",
                         size: 12
@@ -761,10 +1056,10 @@
                 }
             },
             tooltip: {
-                backgroundColor: "rgba(22, 34, 37, 0.92)",
+                backgroundColor: "rgba(18, 32, 39, 0.94)",
                 titleColor: "#fffaf3",
                 bodyColor: "#fffaf3",
-                borderColor: "rgba(255, 255, 255, 0.08)",
+                borderColor: "rgba(255, 255, 255, 0.1)",
                 borderWidth: 1,
                 padding: 12,
                 callbacks: {
@@ -785,20 +1080,20 @@
                 }
             },
             grid: {
-                color: "rgba(22, 34, 37, 0.06)"
+                color: "rgba(18, 32, 39, 0.06)"
             },
             border: {
                 display: false
             }
         };
 
-        function createBarChart(canvasId, labels, values, color, indexAxis = "y") {
+        function createBarChart(canvasId, labels, values, color, indexAxis = "y", label = "Valor") {
             return new Chart(document.getElementById(canvasId), {
                 type: "bar",
                 data: {
                     labels,
                     datasets: [{
-                        label: "Valor",
+                        label,
                         data: values,
                         borderRadius: 12,
                         backgroundColor: color,
@@ -829,7 +1124,7 @@
                 data: {
                     labels,
                     datasets: [{
-                        label: "Valor",
+                        label: "Vendas globais",
                         data: values,
                         fill: true,
                         borderColor: stroke,
@@ -855,22 +1150,49 @@
             });
         }
 
-        createBarChart("missingChart", missingValues.labels, missingValues.values, "#d97706");
-        createLineChart("salesByYear", yearlySales.labels, yearlySales.values, "#0f766e", "rgba(15, 118, 110, 0.12)");
-        createLineChart("releasesByYear", releasesByYear.labels, releasesByYear.values, "#1d4ed8", "rgba(59, 130, 246, 0.14)");
-        createBarChart("genresChart", topGenres.labels, topGenres.values, "#0f766e");
-        createBarChart("platformsChart", topPlatforms.labels, topPlatforms.values, "#1d4ed8");
-        createBarChart("publishersChart", topPublishers.labels, topPublishers.values, "#e76f51");
-        createBarChart("gamesChart", topGames.labels, topGames.values, "#d97706");
+        createBarChart(
+            "chartQ1",
+            VGSALES.q1.map((item) => `${item.name} (${item.platform})`),
+            VGSALES.q1.map((item) => item.sales),
+            "#0f766e",
+            "y",
+            "Vendas globais"
+        );
 
-        new Chart(document.getElementById("regionsChart"), {
+        createBarChart(
+            "chartQ2",
+            VGSALES.q2.map((item) => item.genre),
+            VGSALES.q2.map((item) => item.sales),
+            "#d97706",
+            "y",
+            "Vendas globais"
+        );
+
+        createLineChart(
+            "chartQ3",
+            VGSALES.q3.map((item) => item.year),
+            VGSALES.q3.map((item) => item.sales),
+            "#1d4ed8",
+            "rgba(29, 78, 216, 0.12)"
+        );
+
+        createBarChart(
+            "chartQ4",
+            VGSALES.q4.map((item) => item.platform),
+            VGSALES.q4.map((item) => item.sales),
+            "#dc6b53",
+            "y",
+            "Vendas globais"
+        );
+
+        new Chart(document.getElementById("chartQ5"), {
             type: "doughnut",
             data: {
-                labels: regions.labels,
+                labels: VGSALES.q5.map((item) => item.region),
                 datasets: [{
                     label: "Vendas regionais",
-                    data: regions.values,
-                    backgroundColor: ["#0f766e", "#f4b740", "#e76f51", "#1d4ed8"],
+                    data: VGSALES.q5.map((item) => item.sales),
+                    backgroundColor: ["#0f766e", "#d97706", "#dc6b53", "#1d4ed8"],
                     borderColor: "#fffdf9",
                     borderWidth: 3,
                     hoverOffset: 6
@@ -883,34 +1205,62 @@
             }
         });
 
-        new Chart(document.getElementById("genreRegionChart"), {
-            type: "bar",
-            data: {
-                labels: genreRegion.labels,
-                datasets: genreRegion.datasets.map((dataset) => ({
-                    label: dataset.label,
-                    data: dataset.data,
-                    backgroundColor: dataset.color,
-                    borderRadius: 10,
-                    borderSkipped: false
-                }))
-            },
-            options: {
-                maintainAspectRatio: false,
-                plugins: commonPlugins,
-                scales: {
-                    x: {
-                        ...axisStyle,
-                        stacked: true
-                    },
-                    y: {
-                        ...axisStyle,
-                        stacked: true
-                    }
-                }
-            }
-        });
+        createBarChart(
+            "chartQ6",
+            VGSALES.q6.map((item) => item.publisher),
+            VGSALES.q6.map((item) => item.sales),
+            "#1d4ed8",
+            "y",
+            "Vendas globais"
+        );
+
+        function colorForHeat(value, min, max) {
+            const ratio = (value - min) / (max - min || 1);
+            const hue = 52 - ratio * 48;
+            const saturation = 82;
+            const lightness = 84 - ratio * 34;
+            return `hsl(${hue} ${saturation}% ${lightness}%)`;
+        }
+
+        function renderHeatmap() {
+            const container = document.getElementById("heatmap");
+            const legend = document.getElementById("heatLegend");
+            const flatValues = VGSALES.q7.values.flat();
+            const min = Math.min(...flatValues);
+            const max = Math.max(...flatValues);
+
+            container.style.gridTemplateColumns = `160px repeat(${VGSALES.q7.regions.length}, minmax(0, 1fr))`;
+
+            container.appendChild(document.createElement("div"));
+            VGSALES.q7.regions.forEach((region) => {
+                const header = document.createElement("div");
+                header.className = "heat-header";
+                header.textContent = region;
+                container.appendChild(header);
+            });
+
+            VGSALES.q7.genres.forEach((genre, rowIndex) => {
+                const label = document.createElement("div");
+                label.className = "heat-label";
+                label.textContent = genre;
+                container.appendChild(label);
+
+                VGSALES.q7.regions.forEach((region, columnIndex) => {
+                    const value = VGSALES.q7.values[rowIndex][columnIndex];
+                    const cell = document.createElement("div");
+                    cell.className = "heat-cell";
+                    cell.style.background = colorForHeat(value, min, max);
+                    cell.style.color = value > 15 ? "#2c1800" : "#122027";
+                    cell.title = `${genre} em ${region}: ${value.toFixed(1)}%`;
+                    cell.textContent = `${value.toFixed(1)}%`;
+                    container.appendChild(cell);
+                });
+            });
+
+            legend.style.background = `linear-gradient(90deg, ${colorForHeat(min, min, max)}, ${colorForHeat((min + max) / 2, min, max)}, ${colorForHeat(max, min, max)})`;
+        }
+
+        renderHeatmap();
     </script>
 </body>
-
 </html>
