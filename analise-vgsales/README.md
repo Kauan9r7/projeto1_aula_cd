@@ -20,12 +20,6 @@ path = Path(kagglehub.dataset_download("gregorut/videogamesales"))
 df = pd.read_csv(path / "vgsales.csv")
 ```
 
-Se precisar instalar as dependencias:
-
-```bash
-pip install kagglehub pandas matplotlib seaborn jupyter
-```
-
 ## O que o notebook responde
 
 1. Quais sao os 10 jogos mais vendidos globalmente?
@@ -36,12 +30,9 @@ pip install kagglehub pandas matplotlib seaborn jupyter
 6. Quais publishers lideram em vendas globais?
 7. Cada regiao do mundo prefere um genero diferente?
 
-## Como abrir
+## Pagina dedicada do projeto:
 
-Abra `vgsales_analise.ipynb` no Jupyter, VS Code ou diretamente pelo GitHub.
-
-- Notebook no repositorio: https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/blob/master/analise-vgsales/vgsales_analise.ipynb
-- Pagina dedicada do projeto: https://kauan9r7.github.io/Ciencias_de_Dados_projetos/analise-vgsales.html
+- https://kauan9r7.github.io/Ciencias_de_Dados_projetos/analise-vgsales.html
 
 ## Observacoes sobre a base
 
