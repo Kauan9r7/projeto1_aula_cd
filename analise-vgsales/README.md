@@ -41,7 +41,7 @@ pip install kagglehub pandas matplotlib seaborn jupyter
 Abra `vgsales_analise.ipynb` no Jupyter, VS Code ou diretamente pelo GitHub.
 
 - Notebook no repositorio: https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/blob/master/analise-vgsales/vgsales_analise.ipynb
-- Pagina do repositorio com a secao deste projeto: https://kauan9r7.github.io/Ciencias_de_Dados_projetos/#vgsales
+- Pagina dedicada do projeto: https://kauan9r7.github.io/Ciencias_de_Dados_projetos/analise-vgsales.html
 
 ## Observacoes sobre a base
 

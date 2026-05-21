@@ -15,4 +15,4 @@ Cada pasta representa um projeto ou atividade da disciplina.
 
 - https://kauan9r7.github.io/Ciencias_de_Dados_projetos/
 
-Nessa pagina, o repositorio apresenta todas as atividades em formato de portfolio. O projeto `analise-vgsales` tambem aparece com uma secao propria dentro do mesmo GitHub Pages.
+Nessa pagina, o repositorio apresenta todas as atividades em formato de portfolio. O projeto `analise-vgsales` tambem possui uma pagina propria dentro do mesmo GitHub Pages.
