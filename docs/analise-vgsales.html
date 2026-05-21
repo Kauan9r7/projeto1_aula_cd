@@ -1,1142 +1,1267 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Pagina dedicada do projeto analise-vgsales com visualizacoes e leitura guiada da base Video Game Sales.">
-    <title>Analise de Vendas de Videogames</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <style>
-        :root {
-            --bg: #f6f1e8;
-            --bg-strong: #e8dfd2;
-            --surface: rgba(255, 252, 246, 0.82);
-            --surface-strong: #fffdf9;
-            --ink: #122027;
-            --muted: #5d6a70;
-            --line: rgba(18, 32, 39, 0.08);
-            --teal: #0f766e;
-            --teal-soft: rgba(15, 118, 110, 0.12);
-            --amber: #d97706;
-            --amber-soft: rgba(217, 119, 6, 0.12);
-            --rose: #dc6b53;
-            --blue: #1d4ed8;
-            --shadow: 0 24px 60px rgba(28, 35, 38, 0.12);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            color: var(--ink);
-            font-family: "Space Grotesk", sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 26%),
-                radial-gradient(circle at top right, rgba(217, 119, 6, 0.16), transparent 28%),
-                linear-gradient(180deg, var(--bg-strong) 0%, var(--bg) 42%, #fbf7f0 100%);
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-            background-size: 28px 28px;
-            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 82%);
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        code {
-            padding: 0.16rem 0.38rem;
-            border-radius: 8px;
-            background: rgba(18, 32, 39, 0.07);
-            font-family: Consolas, "Courier New", monospace;
-            font-size: 0.9em;
-        }
-
-        .page {
-            width: min(1200px, calc(100% - 32px));
-            margin: 0 auto;
-            padding: 22px 0 72px;
-        }
-
-        .shell,
-        .section,
-        .card,
-        .chart-card,
-        .metric-card,
-        .method-card,
-        .heat-card {
-            border: 1px solid var(--line);
-            background: var(--surface);
-            backdrop-filter: blur(18px);
-            box-shadow: var(--shadow);
-        }
-
-        .shell,
-        .section {
-            border-radius: 30px;
-        }
-
-        .section {
-            margin-top: 26px;
-            padding: 28px;
-        }
-
-        .topbar {
-            position: sticky;
-            top: 16px;
-            z-index: 20;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 14px 18px;
-            margin-bottom: 18px;
-        }
-
-        .brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .brand-mark {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, rgba(15, 118, 110, 0.18), rgba(217, 119, 6, 0.18));
-            border: 1px solid rgba(18, 32, 39, 0.08);
-            font-size: 0.8rem;
-        }
-
-        .nav-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            color: var(--muted);
-            font-size: 0.94rem;
-        }
-
-        .shell {
-            padding: 34px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .shell::after {
-            content: "";
-            position: absolute;
-            right: -60px;
-            top: -50px;
-            width: 260px;
-            height: 260px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(220, 107, 83, 0.2), transparent 70%);
-        }
-
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            border-radius: 999px;
-            background: rgba(255, 250, 243, 0.84);
-            border: 1px solid rgba(18, 32, 39, 0.1);
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            font-size: 0.84rem;
-        }
-
-        .hero-grid,
-        .analysis-grid,
-        .method-grid,
-        .question-grid,
-        .project-grid,
-        .fact-grid,
-        .metric-grid {
-            display: grid;
-            gap: 18px;
-        }
-
-        .hero-grid {
-            grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-            align-items: stretch;
-        }
-
-        .analysis-grid {
-            grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
-            align-items: stretch;
-        }
-
-        .hero-copy h1,
-        .analysis-copy h2 {
-            margin: 18px 0 14px;
-            letter-spacing: -0.05em;
-            line-height: 0.96;
-        }
-
-        .hero-copy h1 {
-            font-size: clamp(2.9rem, 5vw, 5rem);
-        }
-
-        .analysis-copy h2 {
-            font-size: clamp(2.2rem, 4vw, 4rem);
-        }
-
-        .hero-copy p,
-        .analysis-copy p,
-        .section-copy,
-        .card p,
-        .chart-card p,
-        .method-card p,
-        .fact-card p {
-            color: #344349;
-            font-family: "Source Serif 4", serif;
-            line-height: 1.7;
-        }
-
-        .hero-actions,
-        .card-actions,
-        .analysis-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 13px 18px;
-            border-radius: 16px;
-            border: 1px solid transparent;
-            font-weight: 600;
-            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-        }
-
-        .button:hover {
-            transform: translateY(-1px);
-        }
-
-        .button.primary {
-            background: var(--ink);
-            color: #fffaf3;
-        }
-
-        .button.secondary {
-            background: transparent;
-            color: var(--ink);
-            border-color: rgba(18, 32, 39, 0.14);
-        }
-
-        .hero-panel,
-        .analysis-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .metric-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .metric-card,
-        .fact-card,
-        .card,
-        .chart-card,
-        .method-card,
-        .heat-card {
-            border-radius: 24px;
-            background: var(--surface-strong);
-        }
-
-        .metric-card {
-            padding: 18px;
-        }
-
-        .metric-label {
-            margin: 0 0 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.82rem;
-            color: var(--muted);
-        }
-
-        .metric-value {
-            margin: 0;
-            font-size: 1.95rem;
-            font-weight: 700;
-            letter-spacing: -0.04em;
-        }
-
-        .metric-detail {
-            margin: 8px 0 0;
-            color: var(--muted);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .section-kicker {
-            margin: 0 0 8px;
-            color: var(--amber);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.84rem;
-        }
-
-        .section-title {
-            margin: 0;
-            font-size: clamp(1.8rem, 2.5vw, 2.6rem);
-            letter-spacing: -0.04em;
-        }
-
-        .section-copy {
-            margin: 12px 0 0;
-            max-width: 68ch;
-            font-size: 1.05rem;
-        }
-
-        .project-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            margin-top: 24px;
-        }
-
-        .card {
-            padding: 22px;
-        }
-
-        .card.highlight {
-            background:
-                linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(217, 119, 6, 0.12)),
-                var(--surface-strong);
-        }
-
-        .card-head {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 14px;
-        }
-
-        .card-title {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: var(--teal-soft);
-            color: var(--teal);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .tag.alt {
-            background: var(--amber-soft);
-            color: var(--amber);
-        }
-
-        .card-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 14px;
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-
-        .fact-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            margin-top: 22px;
-        }
-
-        .fact-card {
-            padding: 20px;
-        }
-
-        .fact-card strong {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 1.04rem;
-        }
-
-        .question-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            margin-top: 22px;
-        }
-
-        .chart-card,
-        .heat-card {
-            padding: 22px;
-        }
-
-        .chart-card.large,
-        .heat-card.large {
-            grid-column: span 2;
-        }
-
-        .question-id {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: var(--amber-soft);
-            color: var(--amber);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-bottom: 12px;
-        }
-
-        .chart-card h3,
-        .heat-card h3 {
-            margin: 0 0 8px;
-            font-size: 1.16rem;
-        }
-
-        .chart-wrap {
-            position: relative;
-            height: 320px;
-        }
-
-        .chart-card.large .chart-wrap {
-            height: 360px;
-        }
-
-        .heat-grid {
-            display: grid;
-            gap: 6px;
-            margin-top: 18px;
-        }
-
-        .heat-header,
-        .heat-label,
-        .heat-cell {
-            border-radius: 16px;
-        }
-
-        .heat-header {
-            padding: 12px 8px;
-            text-align: center;
-            color: var(--muted);
-            font-size: 0.82rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            background: rgba(18, 32, 39, 0.04);
-        }
-
-        .heat-label {
-            display: flex;
-            align-items: center;
-            padding: 0 14px;
-            min-height: 58px;
-            background: rgba(18, 32, 39, 0.04);
-            font-weight: 600;
-        }
-
-        .heat-cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 58px;
-            font-weight: 700;
-            transition: transform 0.18s ease;
-        }
-
-        .heat-cell:hover {
-            transform: translateY(-2px);
-        }
-
-        .legend {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 16px;
-            color: var(--muted);
-            font-size: 0.85rem;
-        }
-
-        .legend-bar {
-            width: 180px;
-            height: 10px;
-            border-radius: 999px;
-        }
-
-        .method-grid {
-            grid-template-columns: 1.15fr 0.85fr;
-            margin-top: 22px;
-        }
-
-        .method-card {
-            padding: 22px;
-        }
-
-        .method-card ul {
-            margin: 16px 0 0;
-            padding-left: 18px;
-            color: var(--muted);
-            line-height: 1.8;
-        }
-
-        .code-block {
-            margin-top: 16px;
-            padding: 16px;
-            border-radius: 18px;
-            background: #17252b;
-            color: #eef6f7;
-            font-family: "Space Grotesk", sans-serif;
-            overflow-x: auto;
-        }
-
-        .code-block code {
-            padding: 0;
-            border-radius: 0;
-            background: transparent;
-            font-family: Consolas, "Courier New", monospace;
-            font-size: 0.9rem;
-            line-height: 1.7;
-            white-space: pre;
-        }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-top: 26px;
-            padding: 4px 2px 0;
-            color: var(--muted);
-        }
-
-        .footer-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-        }
-
-        .footer-links a {
-            padding-bottom: 2px;
-            border-bottom: 1px solid rgba(18, 32, 39, 0.14);
-        }
-
-        @media (max-width: 980px) {
-            .hero-grid,
-            .analysis-grid,
-            .project-grid,
-            .fact-grid,
-            .question-grid,
-            .method-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-card.large,
-            .heat-card.large {
-                grid-column: auto;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .page {
-                width: min(100% - 20px, 1200px);
-                padding-top: 18px;
-                padding-bottom: 48px;
-            }
-
-            .shell,
-            .section {
-                border-radius: 24px;
-                padding: 22px;
-            }
-
-            .topbar {
-                padding: 12px 14px;
-            }
-
-            .metric-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-copy h1,
-            .analysis-copy h2 {
-                font-size: 2.4rem;
-            }
-
-            .footer {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Análise de Vendas de Videogames · vgsales</title>
+<meta name="description" content="Análise exploratória da base vgsales (1980–2020) com 7 perguntas respondidas por 7 gráficos interativos. Trabalho de Introdução à Ciência de Dados." />
+<meta name="theme-color" content="#06070d" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
+      },
+      colors: {
+        ink: { 950:'#06070d', 900:'#0a0d18', 850:'#0e1220', 800:'#131829', 700:'#1c2238', 600:'#272e4a' },
+        neon: { cyan:'#22d3ee', violet:'#a78bfa', magenta:'#f472b6', lime:'#a3e635', amber:'#fbbf24' },
+      },
+      animation: {
+        'fade-up': 'fadeUp .9s cubic-bezier(.2,.7,.2,1) both',
+        'pulse-soft': 'pulseSoft 4s ease-in-out infinite',
+        'spin-slow': 'spin 22s linear infinite',
+        'shimmer': 'shimmer 4s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeUp: { '0%':{opacity:0,transform:'translateY(24px)'},'100%':{opacity:1,transform:'translateY(0)'} },
+        pulseSoft: { '0%,100%':{opacity:.7},'50%':{opacity:1} },
+        shimmer: { '0%,100%':{backgroundPosition:'0% 50%'},'50%':{backgroundPosition:'100% 50%'} },
+      },
+    },
+  },
+};
+</script>
+
+<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    background: #06070d;
+    color: #e7e9f3;
+    font-feature-settings: "ss01","cv11";
+    overflow-x: hidden;
+  }
+  /* Background grid */
+  .grid-bg {
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(168,139,250,.18), transparent 55%),
+      radial-gradient(circle at 80% 30%, rgba(34,211,238,.14), transparent 55%),
+      radial-gradient(circle at 50% 90%, rgba(244,114,182,.10), transparent 60%),
+      linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size: auto, auto, auto, 60px 60px, 60px 60px;
+  }
+  .glass {
+    background: linear-gradient(140deg, rgba(28,34,56,.55), rgba(14,18,32,.55));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(255,255,255,.06);
+    box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .neon-border {
+    position: relative;
+  }
+  .neon-border::before{
+    content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1px;
+    background: linear-gradient(135deg, rgba(34,211,238,.55), rgba(168,139,250,.35), rgba(244,114,182,.45));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none;
+  }
+  .gradient-text {
+    background: linear-gradient(120deg, #fff 0%, #c4cef7 40%, #22d3ee 70%, #a78bfa 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 6s ease-in-out infinite;
+  }
+  .ring-dot::before{
+    content:""; display:inline-block; width:.5rem; height:.5rem; border-radius:9999px;
+    background:#22d3ee; box-shadow:0 0 0 4px rgba(34,211,238,.18); margin-right:.5rem;
+    vertical-align:middle;
+  }
+  /* Section number pill */
+  .q-num {
+    background: linear-gradient(135deg, rgba(34,211,238,.18), rgba(168,139,250,.18));
+    border: 1px solid rgba(255,255,255,.1);
+    color: #cbd5ff;
+  }
+  /* Heatmap cells */
+  .heat-cell { transition: transform .25s ease; }
+  .heat-cell:hover { transform: scale(1.06); z-index: 5; }
+  /* Reduce Tailwind play CDN flash */
+  [x-cloak]{display:none!important}
+  /* Skinny scrollbars */
+  *::-webkit-scrollbar{width:8px;height:8px}
+  *::-webkit-scrollbar-track{background:transparent}
+  *::-webkit-scrollbar-thumb{background:#272e4a;border-radius:9999px}
+  *::-webkit-scrollbar-thumb:hover{background:#3a4570}
+  /* Hero halo */
+  .halo {
+    background: radial-gradient(closest-side, rgba(34,211,238,.35), transparent 70%);
+    filter: blur(40px);
+  }
+  /* Chart canvas height helper */
+  .chart-wrap { position: relative; width: 100%; }
+  .chart-wrap canvas { width: 100% !important; height: 100% !important; }
+</style>
 </head>
-<body>
-    <div class="page">
-        <nav class="shell topbar">
-            <a class="brand" href="#top">
-                <span class="brand-mark">CD</span>
-                <span>Ciencias de Dados Projetos</span>
-            </a>
-            <div class="nav-links">
-                <a href="./index.html">Voltar ao portfolio</a>
-                <a href="#graficos">Graficos</a>
-                <a href="#metodo">Metodo</a>
-                <a href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos" target="_blank" rel="noreferrer">GitHub</a>
-            </div>
-        </nav>
 
-        <header class="shell hero-grid" id="top">
-            <section class="hero-copy">
-                <span class="pill">Projeto em destaque | Pagina dedicada</span>
-                <h1>Analise de Vendas de Videogames</h1>
-                <p>
-                    Esta e a pagina propria do projeto <strong>analise-vgsales</strong>. Ela transforma o notebook em uma
-                    leitura guiada com perguntas visuais, resumo dos achados e uma secao final explicando como a base e
-                    baixada via <strong>kagglehub</strong>.
-                </p>
-                <div class="hero-actions">
-                    <a class="button primary" href="#graficos">Ver graficos</a>
-                    <a class="button secondary" href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos/blob/master/analise-vgsales/vgsales_analise.ipynb" target="_blank" rel="noreferrer">Abrir notebook</a>
-                    <a class="button secondary" href="./index.html">Voltar para a home</a>
-                </div>
-            </section>
+<body class="font-sans antialiased">
 
-            <aside class="hero-panel">
-                <div class="metric-grid">
-                    <article class="metric-card">
-                        <p class="metric-label">Jogos</p>
-                        <p class="metric-value">16.598</p>
-                        <p class="metric-detail">Titulos registrados na base original usada no notebook.</p>
-                    </article>
-                    <article class="metric-card">
-                        <p class="metric-label">Periodo</p>
-                        <p class="metric-value">1980-2020</p>
-                        <p class="metric-detail">Faixa temporal coberta pelo dataset Video Game Sales.</p>
-                    </article>
-                    <article class="metric-card">
-                        <p class="metric-label">Perguntas</p>
-                        <p class="metric-value">7</p>
-                        <p class="metric-detail">Cada uma respondida com visualizacoes e interpretacao curta.</p>
-                    </article>
-                    <article class="metric-card">
-                        <p class="metric-label">Formato</p>
-                        <p class="metric-value">1 HTML</p>
-                        <p class="metric-detail">A pagina funciona sem <code>app.js</code> ou <code>data.js</code> separados.</p>
-                    </article>
-                </div>
-            </aside>
-        </header>
+<!-- ========== NAV ========== -->
+<header class="fixed top-0 inset-x-0 z-40">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <nav class="mt-3 glass rounded-2xl px-4 sm:px-5 py-2.5 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-2 group">
+        <span class="relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-ink-800 neon-border">
+          <span class="text-[10px] font-mono font-bold text-neon-cyan">VG</span>
+        </span>
+        <span class="text-sm sm:text-base font-semibold tracking-tight">vgsales <span class="text-white/40">·</span> análise</span>
+      </a>
+      <div class="hidden md:flex items-center gap-1 text-xs text-white/60">
+        <a href="#q1" class="px-2.5 py-1.5 rounded-md hover:text-white hover:bg-white/5 transition">Top jogos</a>
+        <a href="#q2" class="px-2.5 py-1.5 rounded-md hover:text-white hover:bg-white/5 transition">Gêneros</a>
+        <a href="#q3" class="px-2.5 py-1.5 rounded-md hover:text-white hover:bg-white/5 transition">Linha do tempo</a>
+        <a href="#q5" class="px-2.5 py-1.5 rounded-md hover:text-white hover:bg-white/5 transition">Regiões</a>
+        <a href="#q7" class="px-2.5 py-1.5 rounded-md hover:text-white hover:bg-white/5 transition">Heatmap</a>
+      </div>
+      <a id="nav-notebook" href="https://github.com/Ucazin/analise-vgsales/blob/main/vgsales_analise.ipynb"
+         class="text-xs sm:text-sm font-medium px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 transition flex items-center gap-1.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18c-4.51 2-5-2-7-2"/><path d="M15 22v-4a3 3 0 0 0-.88-2.12c2.85-.32 5.85-1.4 5.85-6.34A4.95 4.95 0 0 0 18.61 6c.4-1 .3-2.27-.3-3.18 0 0-1.08-.34-3.55 1.32a12.27 12.27 0 0 0-6.52 0C5.77 2.48 4.69 2.82 4.69 2.82c-.6.9-.71 2.17-.3 3.18A4.95 4.95 0 0 0 3 9.55c0 4.94 3 6 5.85 6.34A3 3 0 0 0 8 18v4"/></svg>
+        Notebook
+      </a>
+    </nav>
+  </div>
+</header>
 
-        <section class="section">
-            <div>
-                <p class="section-kicker">Leitura rapida</p>
-                <h2 class="section-title">O que esta analise deixa claro</h2>
-                <p class="section-copy">
-                    O auge comercial da base esta concentrado entre 2007 e 2010, a Nintendo domina jogos e publishers,
-                    e a America do Norte aparece como principal centro de vendas. O recorte regional tambem mostra que
-                    o Japao se comporta de forma diferente, com peso bem maior de RPG.
-                </p>
-            </div>
+<!-- ========== HERO ========== -->
+<section id="top" class="relative min-h-[100svh] grid-bg pt-32 sm:pt-40 pb-20 overflow-hidden">
+  <div class="absolute inset-x-0 top-40 mx-auto w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] halo opacity-70 pointer-events-none"></div>
 
-            <div class="fact-grid">
-                <article class="fact-card">
-                    <strong>Mercado no auge no fim dos anos 2000</strong>
-                    <p>As vendas explodem em 2008 e 2009, refletindo a fase mais forte de Wii, PS3, Xbox 360 e DS.</p>
-                </article>
-                <article class="fact-card">
-                    <strong>Nintendo concentra valor</strong>
-                    <p>Ela lidera ao mesmo tempo entre os jogos mais vendidos e entre as publishers mais fortes da base.</p>
-                </article>
-                <article class="fact-card">
-                    <strong>Regiao muda a leitura do genero</strong>
-                    <p>Action, Sports e Shooter crescem no Ocidente, enquanto Role-Playing ganha muito mais peso no Japao.</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="section" id="graficos">
-            <div>
-                <p class="section-kicker">Perguntas respondidas</p>
-                <h2 class="section-title">Os 7 graficos do notebook</h2>
-                <p class="section-copy">
-                    Abaixo, o conteudo do projeto aparece em formato de portfolio. Cada grafico responde uma das
-                    perguntas centrais da analise e transforma o notebook em uma leitura guiada.
-                </p>
-            </div>
-
-            <div class="question-grid">
-                <article class="chart-card">
-                    <span class="question-id">Pergunta 1</span>
-                    <h3>Quais sao os 10 jogos mais vendidos?</h3>
-                    <p>O ranking evidencia o dominio da Nintendo e mostra como Wii Sports se distancia dos demais titulos.</p>
-                    <div class="chart-wrap">
-                        <canvas id="chartQ1"></canvas>
-                    </div>
-                </article>
-
-                <article class="chart-card">
-                    <span class="question-id">Pergunta 2</span>
-                    <h3>Qual genero vende mais globalmente?</h3>
-                    <p>Action lidera com folga, seguido por Sports e Shooter, tres categorias com forte apelo comercial.</p>
-                    <div class="chart-wrap">
-                        <canvas id="chartQ2"></canvas>
-                    </div>
-                </article>
-
-                <article class="chart-card large">
-                    <span class="question-id">Pergunta 3</span>
-                    <h3>Como o mercado evoluiu ao longo dos anos?</h3>
-                    <p>O pico fica concentrado entre 2008 e 2009. A queda posterior precisa ser lida junto com a migracao para vendas digitais.</p>
-                    <div class="chart-wrap">
-                        <canvas id="chartQ3"></canvas>
-                    </div>
-                </article>
-
-                <article class="chart-card">
-                    <span class="question-id">Pergunta 4</span>
-                    <h3>Quais plataformas dominaram historicamente?</h3>
-                    <p>PS2, X360, PS3 e Wii lideram a serie e reforcam o peso da geracao dos anos 2000 no dataset.</p>
-                    <div class="chart-wrap">
-                        <canvas id="chartQ4"></canvas>
-                    </div>
-                </article>
-
-                <article class="chart-card">
-                    <span class="question-id">Pergunta 5</span>
-                    <h3>Como as vendas se distribuem entre regioes?</h3>
-                    <p>A America do Norte lidera o volume total, seguida pela Europa. O centro comercial da base esta no Ocidente.</p>
-                    <div class="chart-wrap">
-                        <canvas id="chartQ5"></canvas>
-                    </div>
-                </article>
-
-                <article class="chart-card">
-                    <span class="question-id">Pergunta 6</span>
-                    <h3>Quais publishers lideram em vendas globais?</h3>
-                    <p>Nintendo abre ampla vantagem, com EA e Activision logo atras no segundo bloco de grandes editoras.</p>
-                    <div class="chart-wrap">
-                        <canvas id="chartQ6"></canvas>
-                    </div>
-                </article>
-
-                <article class="heat-card large">
-                    <span class="question-id">Pergunta 7</span>
-                    <h3>Cada regiao prefere um genero diferente?</h3>
-                    <p>O heatmap usa percentuais regionais para mostrar como o perfil de consumo muda entre NA, EU, JP e outras regioes.</p>
-                    <div id="heatmap" class="heat-grid"></div>
-                    <div class="legend">
-                        <span>menor</span>
-                        <span class="legend-bar" id="heatLegend"></span>
-                        <span>maior peso no mercado regional</span>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <section class="section" id="metodo">
-            <div>
-                <p class="section-kicker">Metodo</p>
-                <h2 class="section-title">Como o projeto ficou organizado</h2>
-            </div>
-
-            <div class="method-grid">
-                <article class="method-card">
-                    <p class="section-copy" style="margin-top: 0;">
-                        A pasta <code>analise-vgsales</code> foi simplificada para manter apenas o notebook e o <code>README</code>. A base nao
-                        precisa mais ficar versionada dentro do projeto, porque o proprio notebook faz o download da
-                        versao mais recente do dataset diretamente pelo KaggleHub.
-                    </p>
-                    <div class="code-block">
-                        <code>import kagglehub
-from pathlib import Path
-import pandas as pd
-
-path = Path(kagglehub.dataset_download("gregorut/videogamesales"))
-df = pd.read_csv(path / "vgsales.csv")</code>
-                    </div>
-                </article>
-
-                <article class="method-card">
-                    <p class="section-copy" style="margin-top: 0;">
-                        Esta versao do projeto foi convertida para um unico arquivo HTML dentro de <code>docs</code>,
-                        separado da home do repositorio. Assim, o portfolio principal aponta para esta pagina por meio
-                        de um botao, mas o trabalho continua com identidade propria.
-                    </p>
-                    <ul>
-                        <li>A home do repositorio agora faz apenas a apresentacao geral dos projetos.</li>
-                        <li>Esta pagina concentra os graficos, o heatmap e a explicacao do notebook.</li>
-                        <li>O HTML foi montado como arquivo unico, sem depender de <code>app.js</code> ou <code>data.js</code> locais.</li>
-                    </ul>
-                </article>
-            </div>
-        </section>
-
-        <footer class="footer">
-            <span>Projeto analise-vgsales | Introducao a Ciencia de Dados</span>
-            <div class="footer-links">
-                <a href="./index.html">Voltar ao portfolio</a>
-                <a href="https://github.com/Kauan9r7/Ciencias_de_Dados_projetos" target="_blank" rel="noreferrer">GitHub</a>
-            </div>
-        </footer>
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+    <div class="flex items-center gap-2 text-xs text-white/60 font-mono mb-5 animate-fade-up">
+      <span class="ring-dot"></span>
+      INTRODUÇÃO À CIÊNCIA DE DADOS · TRABALHO EM GRUPO
     </div>
 
-    <script>
-        const VGSALES = {
-            meta: {
-                totalGames: 16598,
-                yearMin: 1980,
-                yearMax: 2020,
-                totalSales: 8920.4,
-                platforms: 31,
-                publishers: 578,
-                genres: 12
+    <h1 class="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.02] max-w-5xl animate-fade-up" style="animation-delay:.1s">
+      <span class="gradient-text">40 anos</span> de vendas de videogames,<br class="hidden sm:block" />
+      contados em <span class="gradient-text">7 perguntas</span>.
+    </h1>
+
+    <p class="mt-6 text-base sm:text-lg text-white/65 max-w-2xl leading-relaxed animate-fade-up" style="animation-delay:.2s">
+      Análise exploratória da base <span class="font-mono text-white/80">vgsales.csv</span> —
+      <span id="meta-games" class="text-white font-semibold">16.598</span> jogos lançados entre
+      <span id="meta-year-min" class="text-white font-semibold">1980</span> e
+      <span id="meta-year-max" class="text-white font-semibold">2020</span>,
+      totalizando <span id="meta-sales" class="text-white font-semibold">8.920</span> milhões de unidades vendidas no mundo.
+    </p>
+
+    <div class="mt-8 flex flex-wrap items-center gap-3 animate-fade-up" style="animation-delay:.3s">
+      <a href="#q1" class="group px-5 py-3 rounded-xl bg-gradient-to-r from-neon-cyan/90 to-neon-violet/90 text-ink-950 font-semibold text-sm hover:scale-[1.02] transition shadow-lg shadow-neon-cyan/20">
+        Começar análise
+        <span class="inline-block transition group-hover:translate-x-1">→</span>
+      </a>
+      <a href="https://github.com/Ucazin/analise-vgsales" class="px-5 py-3 rounded-xl glass text-sm font-medium hover:bg-white/5 transition flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.69 1.25 3.34.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.93 10.93 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.73.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.07.78 2.17v3.22c0 .31.21.67.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+        Ver repositório
+      </a>
+    </div>
+
+    <!-- Stat strip -->
+    <div class="mt-14 sm:mt-20 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 animate-fade-up" style="animation-delay:.4s">
+      <div class="glass rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+        <div class="text-[11px] uppercase tracking-wider text-white/50 font-mono">Jogos</div>
+        <div class="mt-1 text-2xl sm:text-3xl font-bold gradient-text" id="stat-games">16.598</div>
+      </div>
+      <div class="glass rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+        <div class="text-[11px] uppercase tracking-wider text-white/50 font-mono">Plataformas</div>
+        <div class="mt-1 text-2xl sm:text-3xl font-bold gradient-text" id="stat-platforms">31</div>
+      </div>
+      <div class="glass rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+        <div class="text-[11px] uppercase tracking-wider text-white/50 font-mono">Publishers</div>
+        <div class="mt-1 text-2xl sm:text-3xl font-bold gradient-text" id="stat-publishers">578</div>
+      </div>
+      <div class="glass rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+        <div class="text-[11px] uppercase tracking-wider text-white/50 font-mono">Gêneros</div>
+        <div class="mt-1 text-2xl sm:text-3xl font-bold gradient-text" id="stat-genres">12</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll cue -->
+  <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/30 text-xs font-mono animate-pulse-soft">
+    role para começar ↓
+  </div>
+</section>
+
+<main class="relative">
+
+  <!-- ============ Q1 — TOP 10 JOGOS ============ -->
+  <section id="q1" class="py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-5 gap-10 items-center">
+      <div data-aos="fade-right" class="lg:col-span-2 space-y-5">
+        <div class="inline-flex items-center gap-2 q-num text-xs font-mono px-3 py-1 rounded-full">
+          PERGUNTA 01 / 07
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Quais são os <span class="gradient-text">10 jogos mais vendidos</span> de todos os tempos?</h2>
+        <p class="text-white/65 leading-relaxed">
+          <span class="text-white font-semibold">O que investiga:</span> identifica os títulos com maior volume de vendas globais, revelando os fenômenos comerciais da indústria.
+        </p>
+        <p class="text-white/65 leading-relaxed">
+          <span class="text-white font-semibold">Como:</span> ordenamos a base por <code class="font-mono text-neon-cyan">Global_Sales</code> em ordem decrescente e pegamos as 10 primeiras linhas.
+        </p>
+        <p class="text-white/65 leading-relaxed">
+          <span class="text-white font-semibold">O que mostra:</span> <b>Wii Sports</b> domina com mais de 82 milhões de cópias — boa parte por vir junto do console. A Nintendo monopoliza o top 10 (Mario, Wii, Pokémon, Tetris).
+        </p>
+      </div>
+      <div data-aos="fade-left" class="lg:col-span-3">
+        <div class="glass neon-border rounded-3xl p-5 sm:p-7">
+          <div class="chart-wrap" style="height:520px"><canvas id="chartQ1"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q2 — GÊNERO ============ -->
+  <section id="q2" class="py-20 sm:py-28 bg-gradient-to-b from-transparent via-ink-900/40 to-transparent">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-5 gap-10 items-center">
+      <div data-aos="fade-up" class="lg:col-span-3 order-2 lg:order-1">
+        <div class="glass neon-border rounded-3xl p-5 sm:p-7">
+          <div class="chart-wrap" style="height:440px"><canvas id="chartQ2"></canvas></div>
+        </div>
+      </div>
+      <div data-aos="fade-left" class="lg:col-span-2 space-y-5 order-1 lg:order-2">
+        <div class="inline-flex items-center gap-2 q-num text-xs font-mono px-3 py-1 rounded-full">
+          PERGUNTA 02 / 07
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Qual <span class="gradient-text">gênero</span> gera mais vendas globais?</h2>
+        <p class="text-white/65 leading-relaxed">
+          <span class="text-white font-semibold">O que investiga:</span> entender quais gêneros são os mais lucrativos em volume mundial.
+        </p>
+        <p class="text-white/65 leading-relaxed">
+          <span class="text-white font-semibold">Como:</span> agrupamos por <code class="font-mono text-neon-cyan">Genre</code>, somamos <code class="font-mono text-neon-cyan">Global_Sales</code> e ordenamos.
+        </p>
+        <p class="text-white/65 leading-relaxed">
+          <span class="text-white font-semibold">O que mostra:</span> <b>Action</b> lidera disparado, seguido por <b>Sports</b> e <b>Shooter</b>. Esses três formam o motor financeiro da indústria — em grande parte sustentado por lançamentos anuais (FIFA, Call of Duty, GTA).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q3 — EVOLUÇÃO ============ -->
+  <section id="q3" class="py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10">
+      <div data-aos="fade-up" class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 q-num text-xs font-mono px-3 py-1 rounded-full">
+          PERGUNTA 03 / 07
+        </div>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight">Como o mercado <span class="gradient-text">evoluiu ao longo dos anos</span>?</h2>
+        <p class="mt-4 text-white/65 leading-relaxed">
+          Agrupamos as vendas globais por ano de lançamento e plotamos a curva temporal. O pico está claramente entre <b>2008 e 2009</b>: a era de ouro do Wii, PS3, Xbox 360 e Nintendo DS.
+          Depois disso, a queda <i>não</i> significa que a indústria diminuiu — reflete a migração para vendas digitais (Steam, PSN, eShop), que não aparecem nesta base.
+        </p>
+      </div>
+      <div data-aos="fade-up" class="glass neon-border rounded-3xl p-5 sm:p-7">
+        <div class="chart-wrap" style="height:460px"><canvas id="chartQ3"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q4 — PLATAFORMAS ============ -->
+  <section id="q4" class="py-20 sm:py-28 bg-gradient-to-b from-transparent via-ink-900/40 to-transparent">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-5 gap-10 items-center">
+      <div data-aos="fade-right" class="lg:col-span-2 space-y-5">
+        <div class="inline-flex items-center gap-2 q-num text-xs font-mono px-3 py-1 rounded-full">
+          PERGUNTA 04 / 07
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Quais <span class="gradient-text">plataformas</span> dominaram historicamente?</h2>
+        <p class="text-white/65 leading-relaxed">
+          <span class="text-white font-semibold">Como:</span> agrupamos por <code class="font-mono text-neon-cyan">Platform</code>, somamos e pegamos as 10 maiores. Coloração por fabricante.
+        </p>
+        <p class="text-white/65 leading-relaxed">
+          <span class="text-white font-semibold">O que mostra:</span> o <b>PlayStation 2</b> é o líder histórico absoluto. O top 10 é dividido entre <span class="text-[#0070D1] font-semibold">Sony</span>, <span class="text-[#E60012] font-semibold">Nintendo</span> e <span class="text-[#107C10] font-semibold">Microsoft</span>. Portáteis (DS, GBA, PSP) tinham peso enorme — algo que o smartphone matou.
+        </p>
+        <div class="flex flex-wrap gap-2 pt-2 text-xs">
+          <span class="px-2.5 py-1 rounded-md bg-[#0070D1]/15 text-[#7eb6ff] border border-[#0070D1]/30">Sony</span>
+          <span class="px-2.5 py-1 rounded-md bg-[#E60012]/15 text-[#ff8a91] border border-[#E60012]/30">Nintendo</span>
+          <span class="px-2.5 py-1 rounded-md bg-[#107C10]/15 text-[#7fe57f] border border-[#107C10]/30">Microsoft</span>
+          <span class="px-2.5 py-1 rounded-md bg-white/10 text-white/70 border border-white/20">PC</span>
+        </div>
+      </div>
+      <div data-aos="fade-left" class="lg:col-span-3">
+        <div class="glass neon-border rounded-3xl p-5 sm:p-7">
+          <div class="chart-wrap" style="height:480px"><canvas id="chartQ4"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q5 — REGIÕES ============ -->
+  <section id="q5" class="py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-5 gap-10 items-center">
+      <div data-aos="fade-right" class="lg:col-span-3">
+        <div class="glass neon-border rounded-3xl p-5 sm:p-7">
+          <div class="chart-wrap" style="height:460px"><canvas id="chartQ5"></canvas></div>
+        </div>
+      </div>
+      <div data-aos="fade-left" class="lg:col-span-2 space-y-5">
+        <div class="inline-flex items-center gap-2 q-num text-xs font-mono px-3 py-1 rounded-full">
+          PERGUNTA 05 / 07
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Como as vendas se <span class="gradient-text">distribuem entre regiões</span>?</h2>
+        <p class="text-white/65 leading-relaxed">
+          <span class="text-white font-semibold">O que mostra:</span> a <b>América do Norte</b> sozinha responde por cerca de <b>49%</b> das vendas globais. A <b>Europa</b> vem em segundo (~27%), com peso bem maior que o <b>Japão</b> (~15%) — apesar do Japão ser o berço cultural dos videogames.
+        </p>
+        <p class="text-white/65 leading-relaxed">
+          Para qualquer lançamento global, ignorar a América do Norte é praticamente inviável.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q6 — PUBLISHERS ============ -->
+  <section id="q6" class="py-20 sm:py-28 bg-gradient-to-b from-transparent via-ink-900/40 to-transparent">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-5 gap-10 items-center">
+      <div data-aos="fade-up" class="lg:col-span-3 order-2 lg:order-1">
+        <div class="glass neon-border rounded-3xl p-5 sm:p-7">
+          <div class="chart-wrap" style="height:520px"><canvas id="chartQ6"></canvas></div>
+        </div>
+      </div>
+      <div data-aos="fade-left" class="lg:col-span-2 space-y-5 order-1 lg:order-2">
+        <div class="inline-flex items-center gap-2 q-num text-xs font-mono px-3 py-1 rounded-full">
+          PERGUNTA 06 / 07
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Quais <span class="gradient-text">publishers</span> lideram em vendas globais?</h2>
+        <p class="text-white/65 leading-relaxed">
+          A <b>Nintendo</b> vende mais que o dobro da segunda colocada — consequência de publicar exclusivamente para os próprios consoles com franquias monumentais (Mario, Pokémon, Zelda).
+        </p>
+        <p class="text-white/65 leading-relaxed">
+          <b>EA</b>, <b>Activision</b> e <b>Sony</b> formam o segundo bloco. Publishers japonesas (<b>Konami</b>, <b>Sega</b>, <b>Capcom</b>) aparecem fortemente — o Japão produz muito mais do que consome.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q7 — HEATMAP ============ -->
+  <section id="q7" class="py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10">
+      <div data-aos="fade-up" class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 q-num text-xs font-mono px-3 py-1 rounded-full">
+          PERGUNTA 07 / 07
+        </div>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight">Cada região prefere um <span class="gradient-text">gênero diferente</span>?</h2>
+        <p class="mt-4 text-white/65 leading-relaxed">
+          Para cada região calculamos o <b>percentual</b> que cada gênero representa do total local. Quanto mais quente a célula, maior a preferência relativa.
+          <b>NA e EU</b> consomem majoritariamente Action, Sports e Shooter. <b>Japão</b> é caso à parte: dispara em <b>Role-Playing</b>, com Shooter quase irrelevante.
+        </p>
+      </div>
+      <div data-aos="fade-up" class="glass neon-border rounded-3xl p-5 sm:p-7 overflow-x-auto">
+        <div id="heatmap" class="min-w-[560px]"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONCLUSÃO ============ -->
+  <section id="conclusao" class="py-20 sm:py-28 bg-gradient-to-b from-transparent to-ink-900/80">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div data-aos="fade-up" class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 q-num text-xs font-mono px-3 py-1 rounded-full">
+          CONCLUSÃO
+        </div>
+        <h2 class="mt-3 text-3xl sm:text-5xl font-bold tracking-tight">O retrato de uma <span class="gradient-text">era física</span> da indústria.</h2>
+        <p class="mt-4 text-white/65 leading-relaxed text-lg">
+          As 7 perguntas, juntas, formam um mapa claro: <b>Nintendo</b> domina títulos e publishers, <b>Action/Sports/Shooter</b> dominam gêneros, <b>América do Norte</b> domina geograficamente, e o <b>auge das vendas físicas foi 2008–2009</b>.
+        </p>
+      </div>
+
+      <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div data-aos="fade-up" class="glass rounded-2xl p-6">
+          <div class="text-xs font-mono uppercase tracking-wider text-neon-cyan">Insight 1</div>
+          <p class="mt-2 text-white/85">A Nintendo lidera tanto em jogos quanto em publishers — efeito da estratégia de produzir só para si mesma.</p>
+        </div>
+        <div data-aos="fade-up" data-aos-delay="80" class="glass rounded-2xl p-6">
+          <div class="text-xs font-mono uppercase tracking-wider text-neon-violet">Insight 2</div>
+          <p class="mt-2 text-white/85">Action + Sports + Shooter concentram a maior parte das vendas mundiais. É a fórmula AAA.</p>
+        </div>
+        <div data-aos="fade-up" data-aos-delay="160" class="glass rounded-2xl p-6">
+          <div class="text-xs font-mono uppercase tracking-wider text-neon-magenta">Insight 3</div>
+          <p class="mt-2 text-white/85">O Japão é o único mercado onde RPG é o gênero líder — diferença cultural marcante.</p>
+        </div>
+        <div data-aos="fade-up" class="glass rounded-2xl p-6">
+          <div class="text-xs font-mono uppercase tracking-wider text-neon-lime">Insight 4</div>
+          <p class="mt-2 text-white/85">A queda pós-2010 não reflete a indústria — reflete a migração para o digital, que esta base não captura.</p>
+        </div>
+        <div data-aos="fade-up" data-aos-delay="80" class="glass rounded-2xl p-6">
+          <div class="text-xs font-mono uppercase tracking-wider text-neon-amber">Insight 5</div>
+          <p class="mt-2 text-white/85">PlayStation 2 é o console mais vendido da história em jogos físicos — mais de 1,2 bilhão de unidades.</p>
+        </div>
+        <div data-aos="fade-up" data-aos-delay="160" class="glass rounded-2xl p-6">
+          <div class="text-xs font-mono uppercase tracking-wider text-white/60">Limitação</div>
+          <p class="mt-2 text-white/85">Só vendas físicas, sem mobile, e dados pós-2017 incompletos. A base não cobre a era atual da indústria.</p>
+        </div>
+      </div>
+
+      <div class="mt-14 glass neon-border rounded-3xl p-7 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div>
+          <div class="text-xs uppercase tracking-wider text-white/50 font-mono">Quer ver o código?</div>
+          <div class="mt-1 text-xl sm:text-2xl font-semibold">O notebook Jupyter com toda a análise está no GitHub.</div>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a href="https://github.com/Ucazin/analise-vgsales/blob/main/vgsales_analise.ipynb"
+             class="px-5 py-3 rounded-xl bg-gradient-to-r from-neon-cyan/90 to-neon-violet/90 text-ink-950 font-semibold text-sm hover:scale-[1.02] transition shadow-lg shadow-neon-cyan/20">
+             Abrir notebook →
+          </a>
+          <a href="https://github.com/Ucazin/analise-vgsales"
+             class="px-5 py-3 rounded-xl glass text-sm font-medium hover:bg-white/5 transition">
+             Repositório
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-t border-white/5 py-10 text-center text-xs text-white/40">
+  <div class="mx-auto max-w-7xl px-4">
+    Trabalho acadêmico · <span class="font-mono">Introdução à Ciência de Dados</span> · Dados: vgsales (Kaggle) · Construído com Tailwind, Chart.js e muito café.
+  </div>
+</footer>
+
+<!-- ========== LIBS & SCRIPTS ========== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+window.VGSALES = {
+  "meta": {
+    "totalGames": 16598,
+    "yearMin": 1980,
+    "yearMax": 2020,
+    "totalSales": 8920.4,
+    "platforms": 31,
+    "publishers": 578,
+    "genres": 12
+  },
+  "q1": [
+    {
+      "name": "Wii Sports",
+      "platform": "Wii",
+      "sales": 82.74
+    },
+    {
+      "name": "Super Mario Bros.",
+      "platform": "NES",
+      "sales": 40.24
+    },
+    {
+      "name": "Mario Kart Wii",
+      "platform": "Wii",
+      "sales": 35.82
+    },
+    {
+      "name": "Wii Sports Resort",
+      "platform": "Wii",
+      "sales": 33.0
+    },
+    {
+      "name": "Pokemon Red/Pokemon Blue",
+      "platform": "GB",
+      "sales": 31.37
+    },
+    {
+      "name": "Tetris",
+      "platform": "GB",
+      "sales": 30.26
+    },
+    {
+      "name": "New Super Mario Bros.",
+      "platform": "DS",
+      "sales": 30.01
+    },
+    {
+      "name": "Wii Play",
+      "platform": "Wii",
+      "sales": 29.02
+    },
+    {
+      "name": "New Super Mario Bros. Wii",
+      "platform": "Wii",
+      "sales": 28.62
+    },
+    {
+      "name": "Duck Hunt",
+      "platform": "NES",
+      "sales": 28.31
+    }
+  ],
+  "q2": [
+    {
+      "genre": "Action",
+      "sales": 1751.2
+    },
+    {
+      "genre": "Sports",
+      "sales": 1330.9
+    },
+    {
+      "genre": "Shooter",
+      "sales": 1037.4
+    },
+    {
+      "genre": "Role-Playing",
+      "sales": 927.4
+    },
+    {
+      "genre": "Platform",
+      "sales": 831.4
+    },
+    {
+      "genre": "Misc",
+      "sales": 810.0
+    },
+    {
+      "genre": "Racing",
+      "sales": 732.0
+    },
+    {
+      "genre": "Fighting",
+      "sales": 448.9
+    },
+    {
+      "genre": "Simulation",
+      "sales": 392.2
+    },
+    {
+      "genre": "Puzzle",
+      "sales": 244.9
+    },
+    {
+      "genre": "Adventure",
+      "sales": 239.0
+    },
+    {
+      "genre": "Strategy",
+      "sales": 175.1
+    }
+  ],
+  "q3": [
+    {
+      "year": 1980,
+      "sales": 11.38
+    },
+    {
+      "year": 1981,
+      "sales": 35.77
+    },
+    {
+      "year": 1982,
+      "sales": 28.86
+    },
+    {
+      "year": 1983,
+      "sales": 16.79
+    },
+    {
+      "year": 1984,
+      "sales": 50.36
+    },
+    {
+      "year": 1985,
+      "sales": 53.94
+    },
+    {
+      "year": 1986,
+      "sales": 37.07
+    },
+    {
+      "year": 1987,
+      "sales": 21.74
+    },
+    {
+      "year": 1988,
+      "sales": 47.22
+    },
+    {
+      "year": 1989,
+      "sales": 73.45
+    },
+    {
+      "year": 1990,
+      "sales": 49.39
+    },
+    {
+      "year": 1991,
+      "sales": 32.23
+    },
+    {
+      "year": 1992,
+      "sales": 76.16
+    },
+    {
+      "year": 1993,
+      "sales": 45.98
+    },
+    {
+      "year": 1994,
+      "sales": 79.17
+    },
+    {
+      "year": 1995,
+      "sales": 88.11
+    },
+    {
+      "year": 1996,
+      "sales": 199.15
+    },
+    {
+      "year": 1997,
+      "sales": 200.98
+    },
+    {
+      "year": 1998,
+      "sales": 256.47
+    },
+    {
+      "year": 1999,
+      "sales": 251.27
+    },
+    {
+      "year": 2000,
+      "sales": 201.56
+    },
+    {
+      "year": 2001,
+      "sales": 331.47
+    },
+    {
+      "year": 2002,
+      "sales": 395.52
+    },
+    {
+      "year": 2003,
+      "sales": 357.85
+    },
+    {
+      "year": 2004,
+      "sales": 419.31
+    },
+    {
+      "year": 2005,
+      "sales": 459.94
+    },
+    {
+      "year": 2006,
+      "sales": 521.04
+    },
+    {
+      "year": 2007,
+      "sales": 611.13
+    },
+    {
+      "year": 2008,
+      "sales": 678.9
+    },
+    {
+      "year": 2009,
+      "sales": 667.3
+    },
+    {
+      "year": 2010,
+      "sales": 600.45
+    },
+    {
+      "year": 2011,
+      "sales": 515.99
+    },
+    {
+      "year": 2012,
+      "sales": 363.54
+    },
+    {
+      "year": 2013,
+      "sales": 368.11
+    },
+    {
+      "year": 2014,
+      "sales": 337.05
+    },
+    {
+      "year": 2015,
+      "sales": 264.44
+    },
+    {
+      "year": 2016,
+      "sales": 70.93
+    },
+    {
+      "year": 2017,
+      "sales": 0.05
+    },
+    {
+      "year": 2020,
+      "sales": 0.29
+    }
+  ],
+  "q4": [
+    {
+      "platform": "PS2",
+      "sales": 1255.6,
+      "maker": "Sony"
+    },
+    {
+      "platform": "X360",
+      "sales": 980.0,
+      "maker": "Microsoft"
+    },
+    {
+      "platform": "PS3",
+      "sales": 957.8,
+      "maker": "Sony"
+    },
+    {
+      "platform": "Wii",
+      "sales": 926.7,
+      "maker": "Nintendo"
+    },
+    {
+      "platform": "DS",
+      "sales": 822.5,
+      "maker": "Nintendo"
+    },
+    {
+      "platform": "PS",
+      "sales": 730.7,
+      "maker": "Sony"
+    },
+    {
+      "platform": "GBA",
+      "sales": 318.5,
+      "maker": "Nintendo"
+    },
+    {
+      "platform": "PSP",
+      "sales": 296.3,
+      "maker": "Sony"
+    },
+    {
+      "platform": "PS4",
+      "sales": 278.1,
+      "maker": "Sony"
+    },
+    {
+      "platform": "PC",
+      "sales": 258.8,
+      "maker": "PC"
+    }
+  ],
+  "q5": [
+    {
+      "region": "América do Norte",
+      "sales": 4393.0
+    },
+    {
+      "region": "Europa",
+      "sales": 2434.1
+    },
+    {
+      "region": "Japão",
+      "sales": 1291.0
+    },
+    {
+      "region": "Outras regiões",
+      "sales": 797.8
+    }
+  ],
+  "q6": [
+    {
+      "publisher": "Nintendo",
+      "sales": 1786.6
+    },
+    {
+      "publisher": "Electronic Arts",
+      "sales": 1110.3
+    },
+    {
+      "publisher": "Activision",
+      "sales": 727.5
+    },
+    {
+      "publisher": "Sony Computer Entertainment",
+      "sales": 607.5
+    },
+    {
+      "publisher": "Ubisoft",
+      "sales": 474.7
+    },
+    {
+      "publisher": "Take-Two Interactive",
+      "sales": 399.5
+    },
+    {
+      "publisher": "THQ",
+      "sales": 340.8
+    },
+    {
+      "publisher": "Konami Digital Entertainment",
+      "sales": 283.6
+    },
+    {
+      "publisher": "Sega",
+      "sales": 273.0
+    },
+    {
+      "publisher": "Namco Bandai Games",
+      "sales": 254.1
+    }
+  ],
+  "q7": {
+    "genres": [
+      "Action",
+      "Sports",
+      "Shooter",
+      "Platform",
+      "Misc",
+      "Racing",
+      "Role-Playing",
+      "Fighting",
+      "Simulation",
+      "Puzzle",
+      "Adventure",
+      "Strategy"
+    ],
+    "regions": [
+      "NA",
+      "EU",
+      "JP",
+      "Outras"
+    ],
+    "values": [
+      [
+        20.0,
+        21.6,
+        12.4,
+        23.5
+      ],
+      [
+        15.6,
+        15.5,
+        10.5,
+        16.9
+      ],
+      [
+        13.3,
+        12.9,
+        3.0,
+        12.9
+      ],
+      [
+        10.2,
+        8.3,
+        10.1,
+        6.5
+      ],
+      [
+        9.3,
+        8.9,
+        8.3,
+        9.4
+      ],
+      [
+        8.2,
+        9.8,
+        4.4,
+        9.7
+      ],
+      [
+        7.5,
+        7.7,
+        27.3,
+        7.5
+      ],
+      [
+        5.1,
+        4.2,
+        6.8,
+        4.6
+      ],
+      [
+        4.2,
+        4.7,
+        4.9,
+        4.0
+      ],
+      [
+        2.8,
+        2.1,
+        4.4,
+        1.6
+      ],
+      [
+        2.4,
+        2.6,
+        4.0,
+        2.1
+      ],
+      [
+        1.6,
+        1.9,
+        3.8,
+        1.4
+      ]
+    ]
+  }
+};
+</script>
+<script>
+/* eslint-disable no-undef */
+// vgsales site — Chart.js + heatmap + scroll reveals
+(function () {
+  const D = window.VGSALES;
+  if (!D) {
+    console.error("Dados vgsales não carregados (data.js).");
+    return;
+  }
+
+  // ----------- AOS reveal -----------
+  AOS.init({
+    duration: 750,
+    easing: "ease-out-cubic",
+    once: true,
+    offset: 80,
+  });
+
+  // ----------- Hero stats counter animation -----------
+  const fmt = (n) => n.toLocaleString("pt-BR");
+  const countUp = (el, target, suffix = "") => {
+    if (!el) return;
+    const start = performance.now();
+    const dur = 1400;
+    const step = (t) => {
+      const p = Math.min(1, (t - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(Math.round(target * eased)) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  countUp(document.getElementById("stat-games"), D.meta.totalGames);
+  countUp(document.getElementById("stat-platforms"), D.meta.platforms);
+  countUp(document.getElementById("stat-publishers"), D.meta.publishers);
+  countUp(document.getElementById("stat-genres"), D.meta.genres);
+
+  const setText = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+  setText("meta-games", fmt(D.meta.totalGames));
+  setText("meta-year-min", D.meta.yearMin);
+  setText("meta-year-max", D.meta.yearMax);
+  setText("meta-sales", fmt(Math.round(D.meta.totalSales)));
+
+  // ----------- Chart.js global defaults -----------
+  Chart.defaults.color = "rgba(231,233,243,.78)";
+  Chart.defaults.borderColor = "rgba(255,255,255,.06)";
+  Chart.defaults.font.family = '"Space Grotesk", system-ui, sans-serif';
+  Chart.defaults.plugins.legend.labels.color = "rgba(231,233,243,.85)";
+
+  const tooltipStyle = {
+    backgroundColor: "rgba(10,13,24,.95)",
+    titleColor: "#22d3ee",
+    bodyColor: "#e7e9f3",
+    borderColor: "rgba(168,139,250,.4)",
+    borderWidth: 1,
+    padding: 12,
+    cornerRadius: 12,
+    titleFont: { weight: "600", size: 13 },
+    bodyFont: { size: 12 },
+    displayColors: true,
+    boxPadding: 6,
+  };
+
+  // Reusable: vertical gradient (top -> bottom)
+  const vGradient = (ctx, top, bottom) => {
+    const { chartArea, ctx: c } = ctx.chart;
+    if (!chartArea) return top;
+    const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    g.addColorStop(0, top);
+    g.addColorStop(1, bottom);
+    return g;
+  };
+  const hGradient = (ctx, left, right) => {
+    const { chartArea, ctx: c } = ctx.chart;
+    if (!chartArea) return left;
+    const g = c.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+    g.addColorStop(0, left);
+    g.addColorStop(1, right);
+    return g;
+  };
+
+  // ============= Q1 — Top 10 jogos (bar horizontal) =============
+  new Chart(document.getElementById("chartQ1"), {
+    type: "bar",
+    data: {
+      labels: D.q1.map((j) => `${j.name}  ·  ${j.platform}`),
+      datasets: [{
+        label: "Vendas globais (milhões)",
+        data: D.q1.map((j) => j.sales),
+        backgroundColor: (ctx) => hGradient(ctx, "rgba(34,211,238,.85)", "rgba(168,139,250,.85)"),
+        borderRadius: 8,
+        borderSkipped: false,
+        barThickness: "flex",
+      }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: "easeOutCubic" },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipStyle,
+          callbacks: { label: (c) => ` ${c.raw} M de unidades` },
+        },
+      },
+      scales: {
+        x: { grid: { color: "rgba(255,255,255,.05)" }, ticks: { callback: (v) => v + "M" } },
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      },
+    },
+  });
+
+  // ============= Q2 — Gêneros (bar vertical) =============
+  new Chart(document.getElementById("chartQ2"), {
+    type: "bar",
+    data: {
+      labels: D.q2.map((g) => g.genre),
+      datasets: [{
+        data: D.q2.map((g) => g.sales),
+        backgroundColor: (ctx) => vGradient(ctx, "rgba(244,114,182,.95)", "rgba(168,139,250,.45)"),
+        borderRadius: 8,
+        borderSkipped: false,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...tooltipStyle, callbacks: { label: (c) => ` ${c.raw} M de unidades` } },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxRotation: 35, minRotation: 25, font: { size: 11 } } },
+        y: { grid: { color: "rgba(255,255,255,.05)" }, ticks: { callback: (v) => v + "M" } },
+      },
+    },
+  });
+
+  // ============= Q3 — Evolução por ano (area) =============
+  new Chart(document.getElementById("chartQ3"), {
+    type: "line",
+    data: {
+      labels: D.q3.map((d) => d.year),
+      datasets: [{
+        label: "Vendas globais",
+        data: D.q3.map((d) => d.sales),
+        borderColor: "#22d3ee",
+        backgroundColor: (ctx) => vGradient(ctx, "rgba(34,211,238,.45)", "rgba(34,211,238,0)"),
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: "#22d3ee",
+        pointHoverBorderColor: "#fff",
+        pointHoverBorderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      animation: { duration: 1100 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipStyle,
+          callbacks: {
+            title: (items) => `Ano ${items[0].label}`,
+            label: (c) => ` ${c.raw} M de unidades vendidas`,
+          },
+        },
+      },
+      scales: {
+        x: { grid: { color: "rgba(255,255,255,.04)" }, ticks: { maxTicksLimit: 12 } },
+        y: { grid: { color: "rgba(255,255,255,.05)" }, ticks: { callback: (v) => v + "M" } },
+      },
+    },
+  });
+
+  // ============= Q4 — Plataformas =============
+  const corFab = {
+    Sony: "rgba(0,112,209,.9)",
+    Microsoft: "rgba(16,124,16,.9)",
+    Nintendo: "rgba(230,0,18,.9)",
+    PC: "rgba(180,180,180,.9)",
+    Outro: "rgba(150,150,180,.85)",
+  };
+  new Chart(document.getElementById("chartQ4"), {
+    type: "bar",
+    data: {
+      labels: D.q4.map((p) => p.platform),
+      datasets: [{
+        data: D.q4.map((p) => p.sales),
+        backgroundColor: D.q4.map((p) => corFab[p.maker] || corFab.Outro),
+        borderRadius: 8,
+        borderSkipped: false,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipStyle,
+          callbacks: {
+            title: (items) => items[0].label,
+            label: (c) => ` ${c.raw} M de unidades  ·  ${D.q4[c.dataIndex].maker}`,
+          },
+        },
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: { grid: { color: "rgba(255,255,255,.05)" }, ticks: { callback: (v) => v + "M" } },
+      },
+    },
+  });
+
+  // ============= Q5 — Donut regiões =============
+  const coresRegiao = ["#22d3ee", "#a78bfa", "#f472b6", "#fbbf24"];
+  new Chart(document.getElementById("chartQ5"), {
+    type: "doughnut",
+    data: {
+      labels: D.q5.map((r) => r.region),
+      datasets: [{
+        data: D.q5.map((r) => r.sales),
+        backgroundColor: coresRegiao,
+        borderColor: "rgba(10,13,24,.8)",
+        borderWidth: 4,
+        hoverOffset: 14,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "62%",
+      animation: { duration: 1000, animateRotate: true, animateScale: true },
+      plugins: {
+        legend: {
+          position: "right",
+          labels: { padding: 16, boxWidth: 12, font: { size: 13 } },
+        },
+        tooltip: {
+          ...tooltipStyle,
+          callbacks: {
+            label: (c) => {
+              const total = c.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = ((c.raw / total) * 100).toFixed(1);
+              return ` ${c.raw} M  ·  ${pct}%`;
             },
-            q1: [
-                { name: "Wii Sports", platform: "Wii", sales: 82.74 },
-                { name: "Super Mario Bros.", platform: "NES", sales: 40.24 },
-                { name: "Mario Kart Wii", platform: "Wii", sales: 35.82 },
-                { name: "Wii Sports Resort", platform: "Wii", sales: 33.0 },
-                { name: "Pokemon Red/Pokemon Blue", platform: "GB", sales: 31.37 },
-                { name: "Tetris", platform: "GB", sales: 30.26 },
-                { name: "New Super Mario Bros.", platform: "DS", sales: 30.01 },
-                { name: "Wii Play", platform: "Wii", sales: 29.02 },
-                { name: "New Super Mario Bros. Wii", platform: "Wii", sales: 28.62 },
-                { name: "Duck Hunt", platform: "NES", sales: 28.31 }
-            ],
-            q2: [
-                { genre: "Action", sales: 1751.2 },
-                { genre: "Sports", sales: 1330.9 },
-                { genre: "Shooter", sales: 1037.4 },
-                { genre: "Role-Playing", sales: 927.4 },
-                { genre: "Platform", sales: 831.4 },
-                { genre: "Misc", sales: 810.0 },
-                { genre: "Racing", sales: 732.0 },
-                { genre: "Fighting", sales: 448.9 }
-            ],
-            q3: [
-                { year: 1980, sales: 11.38 }, { year: 1981, sales: 35.77 }, { year: 1982, sales: 28.86 },
-                { year: 1983, sales: 16.79 }, { year: 1984, sales: 50.36 }, { year: 1985, sales: 53.94 },
-                { year: 1986, sales: 37.07 }, { year: 1987, sales: 21.74 }, { year: 1988, sales: 47.22 },
-                { year: 1989, sales: 73.45 }, { year: 1990, sales: 49.39 }, { year: 1991, sales: 32.23 },
-                { year: 1992, sales: 76.16 }, { year: 1993, sales: 45.98 }, { year: 1994, sales: 79.17 },
-                { year: 1995, sales: 88.11 }, { year: 1996, sales: 199.15 }, { year: 1997, sales: 200.98 },
-                { year: 1998, sales: 256.47 }, { year: 1999, sales: 251.27 }, { year: 2000, sales: 201.56 },
-                { year: 2001, sales: 331.47 }, { year: 2002, sales: 395.52 }, { year: 2003, sales: 357.85 },
-                { year: 2004, sales: 419.31 }, { year: 2005, sales: 459.94 }, { year: 2006, sales: 521.04 },
-                { year: 2007, sales: 611.13 }, { year: 2008, sales: 678.9 }, { year: 2009, sales: 667.3 },
-                { year: 2010, sales: 600.45 }, { year: 2011, sales: 515.99 }, { year: 2012, sales: 363.54 },
-                { year: 2013, sales: 368.11 }, { year: 2014, sales: 337.05 }, { year: 2015, sales: 264.44 },
-                { year: 2016, sales: 70.93 }, { year: 2017, sales: 0.05 }, { year: 2020, sales: 0.29 }
-            ],
-            q4: [
-                { platform: "PS2", sales: 1255.6, maker: "Sony" },
-                { platform: "X360", sales: 980.0, maker: "Microsoft" },
-                { platform: "PS3", sales: 957.8, maker: "Sony" },
-                { platform: "Wii", sales: 926.7, maker: "Nintendo" },
-                { platform: "DS", sales: 822.5, maker: "Nintendo" },
-                { platform: "PS", sales: 730.7, maker: "Sony" },
-                { platform: "GBA", sales: 318.5, maker: "Nintendo" },
-                { platform: "PSP", sales: 296.3, maker: "Sony" },
-                { platform: "PS4", sales: 278.1, maker: "Sony" },
-                { platform: "PC", sales: 258.8, maker: "PC" }
-            ],
-            q5: [
-                { region: "America do Norte", sales: 4393.0 },
-                { region: "Europa", sales: 2434.1 },
-                { region: "Japao", sales: 1291.0 },
-                { region: "Outras regioes", sales: 797.8 }
-            ],
-            q6: [
-                { publisher: "Nintendo", sales: 1786.6 },
-                { publisher: "Electronic Arts", sales: 1110.3 },
-                { publisher: "Activision", sales: 727.5 },
-                { publisher: "Sony Computer Entertainment", sales: 607.5 },
-                { publisher: "Ubisoft", sales: 474.7 },
-                { publisher: "Take-Two Interactive", sales: 399.5 },
-                { publisher: "THQ", sales: 340.8 },
-                { publisher: "Konami Digital Entertainment", sales: 283.6 }
-            ],
-            q7: {
-                genres: [
-                    "Action", "Sports", "Shooter", "Platform", "Misc", "Racing",
-                    "Role-Playing", "Fighting", "Simulation", "Puzzle", "Adventure", "Strategy"
-                ],
-                regions: ["NA", "EU", "JP", "Outras"],
-                values: [
-                    [20.0, 21.6, 12.4, 23.5],
-                    [15.6, 15.5, 10.5, 16.9],
-                    [13.3, 12.9, 3.0, 12.9],
-                    [10.2, 8.3, 10.1, 6.5],
-                    [9.3, 8.9, 8.3, 9.4],
-                    [8.2, 9.8, 4.4, 9.7],
-                    [7.5, 7.7, 27.3, 7.5],
-                    [5.1, 4.2, 6.8, 4.6],
-                    [4.2, 4.7, 4.9, 4.0],
-                    [2.8, 2.1, 4.4, 1.6],
-                    [2.4, 2.6, 4.0, 2.1],
-                    [1.6, 1.9, 3.8, 1.4]
-                ]
-            }
-        };
+          },
+        },
+      },
+    },
+  });
 
-        const numberFormat = new Intl.NumberFormat("pt-BR", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2
-        });
+  // ============= Q6 — Publishers (bar horizontal) =============
+  new Chart(document.getElementById("chartQ6"), {
+    type: "bar",
+    data: {
+      labels: D.q6.map((p) => p.publisher),
+      datasets: [{
+        data: D.q6.map((p) => p.sales),
+        backgroundColor: (ctx) => hGradient(ctx, "rgba(163,230,53,.85)", "rgba(34,211,238,.85)"),
+        borderRadius: 8,
+        borderSkipped: false,
+      }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...tooltipStyle, callbacks: { label: (c) => ` ${c.raw} M de unidades` } },
+      },
+      scales: {
+        x: { grid: { color: "rgba(255,255,255,.05)" }, ticks: { callback: (v) => v + "M" } },
+        y: { grid: { display: false }, ticks: { font: { size: 12 } } },
+      },
+    },
+  });
 
-        Chart.defaults.color = "#415057";
-        Chart.defaults.font.family = '"Space Grotesk", sans-serif';
-        Chart.defaults.borderColor = "rgba(18, 32, 39, 0.06)";
+  // ============= Q7 — Heatmap (grid CSS custom) =============
+  const heat = document.getElementById("heatmap");
+  if (heat) {
+    const { genres, regions, values } = D.q7;
+    const flat = values.flat();
+    const min = Math.min(...flat), max = Math.max(...flat);
 
-        const commonPlugins = {
-            legend: {
-                labels: {
-                    usePointStyle: true,
-                    pointStyle: "circle",
-                    boxWidth: 10,
-                    padding: 16,
-                    color: "#415057",
-                    font: {
-                        family: "Space Grotesk",
-                        size: 12
-                    }
-                }
-            },
-            tooltip: {
-                backgroundColor: "rgba(18, 32, 39, 0.94)",
-                titleColor: "#fffaf3",
-                bodyColor: "#fffaf3",
-                borderColor: "rgba(255, 255, 255, 0.1)",
-                borderWidth: 1,
-                padding: 12,
-                callbacks: {
-                    label(context) {
-                        const value = context.parsed.x ?? context.parsed.y ?? context.parsed;
-                        return `${context.dataset.label || context.label}: ${numberFormat.format(value)}`;
-                    }
-                }
-            }
-        };
+    // cor: YlOrRd via interpolação simples HSL
+    const colorFor = (v) => {
+      const t = (v - min) / (max - min || 1); // 0..1
+      // Hue: amarelo (50) -> laranja (20) -> vermelho (0)
+      const hue = 50 - t * 50;
+      const sat = 80 + t * 15;
+      const light = 60 - t * 25; // mais escuro qto maior
+      return `hsl(${hue} ${sat}% ${light}%)`;
+    };
 
-        const axisStyle = {
-            ticks: {
-                color: "#55646a",
-                font: {
-                    family: "Space Grotesk",
-                    size: 11
-                }
-            },
-            grid: {
-                color: "rgba(18, 32, 39, 0.06)"
-            },
-            border: {
-                display: false
-            }
-        };
+    const cols = regions.length + 1; // 1 col p/ labels + N regiões
+    let html = `<div style="display:grid;grid-template-columns:140px repeat(${regions.length},1fr);gap:6px">`;
+    // Header row
+    html += `<div></div>`;
+    regions.forEach((r) => {
+      html += `<div class="text-center text-xs font-mono uppercase tracking-wider text-white/55 py-2">${r}</div>`;
+    });
+    // Rows
+    genres.forEach((g, i) => {
+      html += `<div class="text-sm font-medium text-white/85 flex items-center pr-2">${g}</div>`;
+      regions.forEach((_, j) => {
+        const v = values[i][j];
+        const bg = colorFor(v);
+        const fg = v / max > 0.55 ? "#1a0f00" : "#08111a";
+        html += `<div class="heat-cell rounded-lg flex items-center justify-center text-sm font-semibold py-3"
+                 style="background:${bg};color:${fg}"
+                 title="${g} em ${regions[j]}: ${v}%">${v.toFixed(1)}%</div>`;
+      });
+    });
+    html += `</div>`;
+    // Legenda
+    html += `<div class="mt-5 flex items-center gap-3 text-xs text-white/60 justify-end">
+        <span>menor</span>
+        <span class="inline-block h-2 w-40 rounded-full"
+              style="background:linear-gradient(90deg,${colorFor(min)},${colorFor((min+max)/2)},${colorFor(max)})"></span>
+        <span>maior · % do mercado regional</span>
+    </div>`;
+    heat.innerHTML = html;
+  }
+})();
+</script>
 
-        function createBarChart(canvasId, labels, values, color, indexAxis = "y", label = "Valor") {
-            return new Chart(document.getElementById(canvasId), {
-                type: "bar",
-                data: {
-                    labels,
-                    datasets: [{
-                        label,
-                        data: values,
-                        borderRadius: 12,
-                        backgroundColor: color,
-                        hoverBackgroundColor: color,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    indexAxis,
-                    plugins: {
-                        ...commonPlugins,
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        x: axisStyle,
-                        y: axisStyle
-                    }
-                }
-            });
-        }
-
-        function createLineChart(canvasId, labels, values, stroke, fill) {
-            return new Chart(document.getElementById(canvasId), {
-                type: "line",
-                data: {
-                    labels,
-                    datasets: [{
-                        label: "Vendas globais",
-                        data: values,
-                        fill: true,
-                        borderColor: stroke,
-                        backgroundColor: fill,
-                        tension: 0.32,
-                        pointRadius: 0,
-                        pointHoverRadius: 4
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    plugins: {
-                        ...commonPlugins,
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        x: axisStyle,
-                        y: axisStyle
-                    }
-                }
-            });
-        }
-
-        createBarChart(
-            "chartQ1",
-            VGSALES.q1.map((item) => `${item.name} (${item.platform})`),
-            VGSALES.q1.map((item) => item.sales),
-            "#0f766e",
-            "y",
-            "Vendas globais"
-        );
-
-        createBarChart(
-            "chartQ2",
-            VGSALES.q2.map((item) => item.genre),
-            VGSALES.q2.map((item) => item.sales),
-            "#d97706",
-            "y",
-            "Vendas globais"
-        );
-
-        createLineChart(
-            "chartQ3",
-            VGSALES.q3.map((item) => item.year),
-            VGSALES.q3.map((item) => item.sales),
-            "#1d4ed8",
-            "rgba(29, 78, 216, 0.12)"
-        );
-
-        createBarChart(
-            "chartQ4",
-            VGSALES.q4.map((item) => item.platform),
-            VGSALES.q4.map((item) => item.sales),
-            "#dc6b53",
-            "y",
-            "Vendas globais"
-        );
-
-        new Chart(document.getElementById("chartQ5"), {
-            type: "doughnut",
-            data: {
-                labels: VGSALES.q5.map((item) => item.region),
-                datasets: [{
-                    label: "Vendas regionais",
-                    data: VGSALES.q5.map((item) => item.sales),
-                    backgroundColor: ["#0f766e", "#d97706", "#dc6b53", "#1d4ed8"],
-                    borderColor: "#fffdf9",
-                    borderWidth: 3,
-                    hoverOffset: 6
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                cutout: "58%",
-                plugins: commonPlugins
-            }
-        });
-
-        createBarChart(
-            "chartQ6",
-            VGSALES.q6.map((item) => item.publisher),
-            VGSALES.q6.map((item) => item.sales),
-            "#1d4ed8",
-            "y",
-            "Vendas globais"
-        );
-
-        function colorForHeat(value, min, max) {
-            const ratio = (value - min) / (max - min || 1);
-            const hue = 52 - ratio * 48;
-            const saturation = 82;
-            const lightness = 84 - ratio * 34;
-            return `hsl(${hue} ${saturation}% ${lightness}%)`;
-        }
-
-        function renderHeatmap() {
-            const container = document.getElementById("heatmap");
-            const legend = document.getElementById("heatLegend");
-            const flatValues = VGSALES.q7.values.flat();
-            const min = Math.min(...flatValues);
-            const max = Math.max(...flatValues);
-
-            container.style.gridTemplateColumns = `160px repeat(${VGSALES.q7.regions.length}, minmax(0, 1fr))`;
-
-            container.appendChild(document.createElement("div"));
-            VGSALES.q7.regions.forEach((region) => {
-                const header = document.createElement("div");
-                header.className = "heat-header";
-                header.textContent = region;
-                container.appendChild(header);
-            });
-
-            VGSALES.q7.genres.forEach((genre, rowIndex) => {
-                const label = document.createElement("div");
-                label.className = "heat-label";
-                label.textContent = genre;
-                container.appendChild(label);
-
-                VGSALES.q7.regions.forEach((region, columnIndex) => {
-                    const value = VGSALES.q7.values[rowIndex][columnIndex];
-                    const cell = document.createElement("div");
-                    cell.className = "heat-cell";
-                    cell.style.background = colorForHeat(value, min, max);
-                    cell.style.color = value > 15 ? "#2c1800" : "#122027";
-                    cell.title = `${genre} em ${region}: ${value.toFixed(1)}%`;
-                    cell.textContent = `${value.toFixed(1)}%`;
-                    container.appendChild(cell);
-                });
-            });
-
-            legend.style.background = `linear-gradient(90deg, ${colorForHeat(min, min, max)}, ${colorForHeat((min + max) / 2, min, max)}, ${colorForHeat(max, min, max)})`;
-        }
-
-        renderHeatmap();
-    </script>
 </body>
 </html>
